@@ -5,5 +5,8 @@
   "main": "index.js",
   "repository": "git@github.com:happo/happo-cypress.git",
   "author": "Henric Trotzig <henric.trotzig@happo.io>",
-  "license": "MIT"
+  "license": "MIT",
+  "devDependencies": {
+    "cypress": "^4.2.0"
+  }
 }
