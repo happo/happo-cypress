@@ -6,7 +6,15 @@
   "repository": "git@github.com:happo/happo-cypress.git",
   "author": "Henric Trotzig <henric.trotzig@happo.io>",
   "license": "MIT",
+  "scripts": {
+    "dev": "next --port 7654",
+    "build": "next build",
+    "start": "next start"
+  },
   "devDependencies": {
-    "cypress": "^4.2.0"
+    "cypress": "^4.2.0",
+    "next": "^9.3.1",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1"
   }
 }
