@@ -3,10 +3,12 @@ const crypto = require('crypto');
 
 const parseSrcset = require('parse-srcset');
 
-const findBackgroundImageUrls = require('./src/findBackgroundImageUrls');
+const findCSSAssetUrls = require('./src/findCSSAssetUrls');
 
 before(() => {
-  cy.task('happoInit');
+  cy.task('happoInit', {
+    baseUrl: Cypress.config('baseUrl'),
+  });
 });
 
 after(() => {
@@ -43,14 +45,13 @@ function extractCSSChunks({ doc }) {
         .update(content)
         .digest('hex');
 
-      const assetUrls = findBackgroundImageUrls(content);
-      blocks.push({ content, key, assetUrls });
+      blocks.push({ content, key });
     }
   });
   return blocks;
 }
 
-function getAssetUrls(subject, win) {
+function getSubjectAssetUrls(subject, doc) {
   const allUrls = [];
   const allElements = [subject[0]].concat(
     Array.from(subject[0].querySelectorAll('*')),
@@ -66,7 +67,7 @@ function getAssetUrls(subject, win) {
       allUrls.push(...parseSrcset(srcset).map(p => p.url));
     }
     if (style) {
-      allUrls.push(...findBackgroundImageUrls(style));
+      allUrls.push(...findCSSAssetUrls(style));
     }
   });
   return allUrls;
@@ -80,7 +81,7 @@ Cypress.Commands.add(
     const variant = options.variant || 'default';
     cy.document().then(doc => {
       const html = subject.prop('outerHTML');
-      const assetUrls = getAssetUrls(subject, doc.window);
+      const assetUrls = getSubjectAssetUrls(subject, doc);
       const cssBlocks = extractCSSChunks({ doc });
       cy.task('happoRegisterSnapshot', {
         html,

@@ -1,6 +1,6 @@
 const URL_PATTERN = /(?:url\(['"]?)(.*?)(?:['"]?)\)/g;
 
-module.exports = function findBackgroundImageUrls(string) {
+module.exports = function findCSSAssetUrls(string) {
   const result = [];
   let match;
   // eslint-disable-next-line no-cond-assign
