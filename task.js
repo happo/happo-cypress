@@ -63,7 +63,6 @@ module.exports = {
       urls: [...allUrls],
       baseUrl,
     });
-    console.log(snapshots)
 
     const globalCSS = allCssBlocks.map(block => block.content).join('\n');
     const payload = {
