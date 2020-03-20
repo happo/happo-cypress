@@ -1,6 +1,10 @@
 const path = require('path');
 const crypto = require('crypto');
 
+const parseSrcset = require('parse-srcset');
+
+const findBackgroundImageUrls = require('./src/findBackgroundImageUrls');
+
 before(() => {
   cy.task('happoInit');
 });
@@ -39,23 +43,52 @@ function extractCSSChunks({ doc }) {
         .update(content)
         .digest('hex');
 
-      blocks.push({ content, key });
+      const assetUrls = findBackgroundImageUrls(content);
+      blocks.push({ content, key, assetUrls });
     }
   });
   return blocks;
 }
 
+function getAssetUrls(subject, win) {
+  const allUrls = [];
+  const allElements = [subject[0]].concat(
+    Array.from(subject[0].querySelectorAll('*')),
+  );
+  allElements.forEach(element => {
+    const srcset = element.getAttribute('srcset');
+    const src = element.getAttribute('src');
+    const style = element.getAttribute('style');
+    if (src) {
+      allUrls.push(src);
+    }
+    if (srcset) {
+      allUrls.push(...parseSrcset(srcset).map(p => p.url));
+    }
+    if (style) {
+      allUrls.push(...findBackgroundImageUrls(style));
+    }
+  });
+  return allUrls;
+}
+
 Cypress.Commands.add(
   'happoScreenshot',
   { prevSubject: 'optional' },
-  (subject, happoOptions = {}, options = {}) => {
-    const component = happoOptions.component || cy.state('runnable').fullTitle();
-    const variant = happoOptions.variant || 'default';
-
+  (subject, options = {}) => {
+    const component = options.component || cy.state('runnable').fullTitle();
+    const variant = options.variant || 'default';
     cy.document().then(doc => {
       const html = subject.prop('outerHTML');
+      const assetUrls = getAssetUrls(subject, doc.window);
       const cssBlocks = extractCSSChunks({ doc });
-      cy.task('happoRegisterSnapshot', { html, cssBlocks, component, variant });
+      cy.task('happoRegisterSnapshot', {
+        html,
+        cssBlocks,
+        assetUrls,
+        component,
+        variant,
+      });
     });
   },
 );

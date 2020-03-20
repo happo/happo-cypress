@@ -5,5 +5,7 @@ describe('The Home Page', () => {
 
     cy.visit('/');
     cy.get('.button').happoScreenshot();
+
+    cy.get('.images').happoScreenshot();
   });
 });

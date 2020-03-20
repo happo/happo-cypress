@@ -14,9 +14,43 @@ export default function IndexPage() {
         <h1>I'm a card</h1>
         <img src="/hotel.jpg" />
       </div>
-      <button className="button">
-        Click me
-      </button>
+      <button className="button">Click me</button>
+      <div className="images">
+        <img
+          className="image"
+          srcSet="/storyhotel-small.jpg 480w, /storyhotel-large.jpg 800w"
+          sizes="(max-width: 600px) 480px, 800px"
+          src="/storyhotel-large.jpg"
+        />
+        <img
+          className="image"
+          src="http://localhost:7654/storyhotel-small.jpg?foobar=ignore"
+        />
+        <div
+          className="image"
+          style={{
+            backgroundImage: 'url(/storyhotel-chairs.jpg)',
+            paddingTop: '33%',
+          }}
+        />
+        <div
+          className="image background"
+          style={{
+            paddingTop: '33%',
+          }}
+        />
+        <picture>
+          <source
+            srcSet="/storyhotel-breakfast.jpg"
+            media="(max-width: 1800px)"
+          />
+          <img className="image" src="/broken-image.jpg" />
+        </picture>
+        <img
+          className="image"
+          src="https://q-xx.bstatic.com/xdata/images/hotel/max1000/133065887.jpg?k=4d2f546ba33c456afeceed92d808a48de95f92c65a235c9cf399a6e2f6c67c34&o="
+        />
+      </div>
       <style jsx>{`
         .card {
           max-width: 400px;
@@ -41,6 +75,15 @@ export default function IndexPage() {
           text-align: center;
           font-size: 14px;
           border-radius: 20px;
+        }
+        .images .image {
+          display: block;
+          max-width: 500px;
+          background-size: cover;
+          background-repeat: no-repeat;
+        }
+        .image.background {
+          background: url('/storyhotel-bathroom.jpg');
         }
       `}</style>
     </div>

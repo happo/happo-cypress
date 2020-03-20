@@ -1,25 +1,32 @@
 let snapshots = [];
 let allCssBlocks = [];
+let allAssetUrls = new Set();
 
 module.exports = {
-  happoRegisterSnapshot({ html, cssBlocks, component, variant }) {
+  happoRegisterSnapshot({ html, assetUrls, cssBlocks, component, variant }) {
+    assetUrls.forEach(url => {
+      allAssetUrls.add(url);
+    });
     snapshots.push({ html, component, variant });
-    cssBlocks.forEach(({ key, href, content }) => {
-      if (allCssBlocks.some((b) => b.key === key)) {
-        console.log(`Already seen block ${key}`);
+    cssBlocks.forEach((block) => {
+      if (allCssBlocks.some((b) => b.key === block.key)) {
+        console.log(`Already seen CSS block ${block.key}`);
         return;
       }
-      allCssBlocks.push({ key, href, content });
+      allCssBlocks.push(block);
     });
     return null;
   },
+
   happoInit() {
     snapshots = [];
     allCssBlocks = [];
+    allAssetUrls = new Set();
     return null;
   },
-  happoTeardown() {
-    console.log('teardown', snapshots, allCssBlocks);
+
+  async happoTeardown() {
+    console.log('teardown', snapshots, allCssBlocks, allAssetUrls);
     return null;
   }
 }
