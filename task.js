@@ -1,6 +1,7 @@
 const nodeFetch = require('node-fetch');
 const loadUserConfig = require('happo.io/build/loadUserConfig').default;
 const makeRequest = require('happo.io/build/makeRequest').default;
+const compareReports = require('happo.io/build/commands/compareReports').default;
 
 const createAssetPackage = require('./src/createAssetPackage');
 const findCSSAssetUrls = require('./src/findCSSAssetUrls');
@@ -127,13 +128,13 @@ module.exports = {
         },
         { ...happoConfig, maxTries: 3 },
       );
-      console.log(jobResult);
       await compareReports(
         beforeSha,
         afterSha,
         happoConfig,
         { link, message, isAsync: true },
       );
+      console.log(`[HAPPO] ${jobResult.url}`);
     }
 
     return null;
