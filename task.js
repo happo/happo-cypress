@@ -1,4 +1,3 @@
-const crypto = require('crypto');
 const nodeFetch = require('node-fetch');
 const loadUserConfig = require('happo.io/build/loadUserConfig').default;
 const makeRequest = require('happo.io/build/makeRequest').default;
@@ -6,17 +5,14 @@ const makeRequest = require('happo.io/build/makeRequest').default;
 const createAssetPackage = require('./src/createAssetPackage');
 const findCSSAssetUrls = require('./src/findCSSAssetUrls');
 const makeAbsolute = require('./src/makeAbsolute');
-
-const { CURRENT_SHA } = process.env;
-const SHA = CURRENT_SHA || `dev-${crypto.randomBytes(4).toString('hex')}`;
-console.log(`[HAPPO] Using sha ${SHA}`);
+const resolveEnvironment = require('./src/resolveEnvironment');
 
 let snapshots = [];
 let allCssBlocks = [];
 let snapshotAssetUrls = new Set();
 let baseUrl;
 let happoConfig;
-let isEnabled = false;
+let isEnabled;
 
 async function downloadCSSContent(blocks, baseUrl) {
   const promises = blocks.map(async block => {
@@ -55,6 +51,7 @@ module.exports = {
   async happoInit(options) {
     try {
       happoConfig = await loadUserConfig('./.happo.js');
+      isEnabled = true;
     } catch (e) {
       if (/You need an.*apiKey/.test(e.message)) {
         isEnabled = false;
@@ -102,9 +99,10 @@ module.exports = {
         allRequestIds.push(...requestIds);
       }),
     );
+    const { beforeSha, afterSha, link, message } = resolveEnvironment();
     await makeRequest(
       {
-        url: `${happoConfig.endpoint}/api/async-reports/${SHA}`,
+        url: `${happoConfig.endpoint}/api/async-reports/${afterSha}`,
         method: 'POST',
         json: true,
         body: {
@@ -114,6 +112,29 @@ module.exports = {
       },
       { ...happoConfig, maxTries: 3 },
     );
+
+    if (beforeSha) {
+      const jobResult = await makeRequest(
+        {
+          url: `${happoConfig.endpoint}/api/jobs/${beforeSha}/${afterSha}`,
+          method: 'POST',
+          json: true,
+          body: {
+            project: happoConfig.project,
+            link,
+            message,
+          },
+        },
+        { ...happoConfig, maxTries: 3 },
+      );
+      console.log(jobResult);
+      await compareReports(
+        beforeSha,
+        afterSha,
+        happoConfig,
+        { link, message, isAsync: true },
+      );
+    }
 
     return null;
   },
