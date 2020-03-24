@@ -124,7 +124,7 @@ module.exports = {
       }),
     );
     const { beforeSha, afterSha, link, message } = resolveEnvironment();
-    await makeRequest(
+    const reportResult = await makeRequest(
       {
         url: `${happoConfig.endpoint}/api/async-reports/${afterSha}`,
         method: 'POST',
@@ -157,6 +157,8 @@ module.exports = {
         isAsync: true,
       });
       console.log(`[HAPPO] ${jobResult.url}`);
+    } else {
+      console.log(`[HAPPO] ${reportResult.url}`);
     }
 
     return null;
