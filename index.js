@@ -75,7 +75,7 @@ function getSubjectAssetUrls(subject, doc) {
 
 Cypress.Commands.add(
   'happoScreenshot',
-  { prevSubject: 'optional' },
+  { prevSubject: true },
   (subject, options = {}) => {
     const component = options.component || cy.state('runnable').fullTitle();
     const variant = options.variant || 'default';

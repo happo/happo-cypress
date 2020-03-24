@@ -1,6 +1,7 @@
 describe('The Home Page', () => {
   it('successfully loads', () => {
     cy.visit('/');
+    cy.get('body').happoScreenshot({ component: 'Full-page' });
     cy.get('.card').happoScreenshot({ component: 'Card' });
 
     cy.visit('/');
