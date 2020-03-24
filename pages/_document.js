@@ -13,13 +13,14 @@ class MyDocument extends Document {
       <Html lang="en">
         <Head>
           <link
-            href="https://unpkg.com/reset-css@5.0.1/reset.css"
+            href="https://fonts.googleapis.com/css?family=Lobster&display=swap"
             rel="stylesheet"
           />
           <link
-            href="/global.css"
+            href="https://unpkg.com/reset-css@5.0.1/reset.css"
             rel="stylesheet"
           />
+          <link href="/global.css" rel="stylesheet" />
         </Head>
         <body>
           <Main />

@@ -1,7 +1,17 @@
+@font-face {
+  font-family: 'CustomFont';
+  src: url('/Lato-Bold.woff2') format('woff2');
+}
+
 body {
+  font-family: 'CustomFont';
   padding: 20px;
   background-color: #f0f0f0;
 
   /* Override next.js style active during page load */
   display: block !important;
+}
+
+button {
+  font-family: 'CustomFont';
 }

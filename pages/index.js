@@ -61,8 +61,8 @@ export default function IndexPage() {
         }
         .card h1 {
           font-size: 30px;
-          font-family: sans-serif;
           margin-bottom: 10px;
+          font-family: 'Lobster';
         }
         img {
           width: 100%;
