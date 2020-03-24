@@ -1,19 +1,21 @@
 const nodeFetch = require('node-fetch');
 const loadUserConfig = require('happo.io/build/loadUserConfig').default;
 const makeRequest = require('happo.io/build/makeRequest').default;
-const compareReports = require('happo.io/build/commands/compareReports').default;
+const compareReports = require('happo.io/build/commands/compareReports')
+  .default;
 
 const createAssetPackage = require('./src/createAssetPackage');
 const findCSSAssetUrls = require('./src/findCSSAssetUrls');
 const makeAbsolute = require('./src/makeAbsolute');
 const resolveEnvironment = require('./src/resolveEnvironment');
 
-let snapshots = [];
-let allCssBlocks = [];
-let snapshotAssetUrls = new Set();
+let snapshots;
+let allCssBlocks;
+let snapshotAssetUrls;
 let baseUrl;
 let happoConfig;
 let isEnabled;
+let knownComponentVariants;
 
 async function downloadCSSContent(blocks, baseUrl) {
   const promises = blocks.map(async block => {
@@ -33,11 +35,29 @@ async function downloadCSSContent(blocks, baseUrl) {
   await Promise.all(promises);
 }
 
+function dedupeVariant(component, variant) {
+  knownComponentVariants[component] = knownComponentVariants[component] || {};
+  const comp = knownComponentVariants[component];
+  comp[variant] = comp[variant] || 0;
+  comp[variant]++;
+  if (comp[variant] === 1) {
+    return variant;
+  }
+  return `${variant}-${comp[variant]}`;
+}
+
 module.exports = {
-  happoRegisterSnapshot({ html, assetUrls, cssBlocks, component, variant }) {
+  happoRegisterSnapshot({
+    html,
+    assetUrls,
+    cssBlocks,
+    component,
+    variant: rawVariant,
+  }) {
     if (!isEnabled) {
       return null;
     }
+    const variant = dedupeVariant(component, rawVariant);
     assetUrls.forEach(url => snapshotAssetUrls.add(url));
     snapshots.push({ html, component, variant });
     cssBlocks.forEach(block => {
@@ -59,12 +79,15 @@ module.exports = {
         console.warn(
           "[HAPPO] Happo is disabled since we couldn't find an `apiKey` and/or `apiSecret`",
         );
+      } else {
+        throw e;
       }
     }
     snapshots = [];
     allCssBlocks = [];
     snapshotAssetUrls = new Set();
     baseUrl = options.baseUrl;
+    knownComponentVariants = {};
     return null;
   },
 
@@ -128,12 +151,11 @@ module.exports = {
         },
         { ...happoConfig, maxTries: 3 },
       );
-      await compareReports(
-        beforeSha,
-        afterSha,
-        happoConfig,
-        { link, message, isAsync: true },
-      );
+      await compareReports(beforeSha, afterSha, happoConfig, {
+        link,
+        message,
+        isAsync: true,
+      });
       console.log(`[HAPPO] ${jobResult.url}`);
     }
 

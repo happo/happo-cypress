@@ -1,7 +1,7 @@
 describe('The Home Page', () => {
   it('successfully loads', () => {
     cy.visit('/');
-    cy.get('.card').happoScreenshot({ component: 'Card', variant: 'default' });
+    cy.get('.card').happoScreenshot({ component: 'Card' });
 
     cy.visit('/');
     cy.get('.button').happoScreenshot({
@@ -13,5 +13,10 @@ describe('The Home Page', () => {
       component: 'Images',
       variant: 'multiple',
     });
+
+
+    cy.get('.button').happoScreenshot();
+    cy.get('.button').happoScreenshot();
+    cy.get('.button').happoScreenshot();
   });
 });
