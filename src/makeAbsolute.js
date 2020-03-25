@@ -5,5 +5,8 @@ module.exports = function makeAbsolute(url, baseUrl) {
   if (url.startsWith('/')) {
     return `${baseUrl}${url}`;
   }
-  return url;
+  if (/^https?:/.test(url)) {
+    return url;
+  }
+  return `${baseUrl}/${url}`;
 };
