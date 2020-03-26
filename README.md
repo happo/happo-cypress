@@ -3,6 +3,10 @@
 The `happo-cypress` module adds [Happo.io](https://happo.io) cross-browser
 screenshots to your [Cypress.io](https://cypress.io) test suite.
 
+Check out the
+[`happo-cypress-example-todomvc`](https://github.com/happo/happo-cypress-example-todomvc)
+for a demo of how this module is used.
+
 ## Pre-requisites
 
 Before you start following the instructions here, you'll need [a working
