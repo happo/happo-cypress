@@ -151,11 +151,13 @@ module.exports = {
         },
         { ...happoConfig, maxTries: 3 },
       );
-      await compareReports(beforeSha, afterSha, happoConfig, {
-        link,
-        message,
-        isAsync: true,
-      });
+      if (beforeSha !== afterSha) {
+        await compareReports(beforeSha, afterSha, happoConfig, {
+          link,
+          message,
+          isAsync: true,
+        });
+      }
       console.log(`[HAPPO] ${jobResult.url}`);
     } else {
       console.log(`[HAPPO] ${reportResult.url}`);
