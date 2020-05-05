@@ -95,6 +95,10 @@ module.exports = {
     if (!isEnabled) {
       return null;
     }
+    if (!snapshots.length) {
+      console.log(`[HAPPO] No snapshots were recorded. Ignoring.`);
+      return null;
+    }
     await downloadCSSContent(allCssBlocks, baseUrl);
     const allUrls = new Set([...snapshotAssetUrls]);
     allCssBlocks.forEach(block => {
