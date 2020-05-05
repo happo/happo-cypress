@@ -3435,10 +3435,10 @@ gzip-size@5.1.1:
     duplexer "^0.1.1"
     pify "^4.0.1"
 
-happo.io@^5.2.0-rc.2:
-  version "5.2.0-rc.2"
-  resolved "https://registry.npmjs.org/happo.io/-/happo.io-5.2.0-rc.2.tgz#29dfdf85f7007a620a1ee5c0d3c501253d927226"
-  integrity sha512-NsasWOoNzmibePWJQtS8xHqkIjS7HhGo+LejLp2mPi+bWdVvEgnzwnoQLPSKtyU9M4aJqPOiFi3mLggo5ldT6w==
+happo.io@^5.4.0:
+  version "5.4.0"
+  resolved "https://registry.npmjs.org/happo.io/-/happo.io-5.4.0.tgz#e260aeddc3f5e2251234f07e4e5652f38cef4cf9"
+  integrity sha512-O+JhXhc/I9UOawmjszVZ8Ia1K1mx28eO+sBbcfIB2CKVLg0fvk9pyD7Jj8ZCpa1BhnAwCwor8lwF3ml6LJATTw==
   dependencies:
     archiver "^3.0.0"
     async-retry "^1.3.1"
