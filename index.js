@@ -1,4 +1,3 @@
-const path = require('path');
 const crypto = require('crypto');
 
 const parseSrcset = require('parse-srcset');
@@ -29,9 +28,7 @@ function extractCSSChunks({ doc }) {
       blocks.push({ key: href, href });
     } else {
       // <style>
-      const lines = content
-        ? content.split('\n')
-        : Array.from(element.sheet.cssRules).map(r => r.cssText);
+      const lines = Array.from(element.sheet.cssRules).map(r => r.cssText);
 
       // Filter out those lines that are comments (these are often source
       // mappings)
@@ -51,7 +48,7 @@ function extractCSSChunks({ doc }) {
   return blocks;
 }
 
-function getSubjectAssetUrls(subject, doc) {
+function getSubjectAssetUrls(subject) {
   const allUrls = [];
   const allElements = [subject[0]].concat(
     Array.from(subject[0].querySelectorAll('*')),

@@ -23,7 +23,7 @@ async function downloadCSSContent(blocks, baseUrl) {
       const res = await nodeFetch(makeAbsolute(block.href, baseUrl));
       if (!res.ok) {
         console.warn(
-          `[HAPPO] Failed to fetch CSS file from ${href}. This might mean styles are missing in your Happo screenshots`,
+          `[HAPPO] Failed to fetch CSS file from ${block.href}. This might mean styles are missing in your Happo screenshots`,
         );
         return;
       }

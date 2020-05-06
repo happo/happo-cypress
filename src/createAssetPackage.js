@@ -26,7 +26,8 @@ function normalize(url, baseUrl) {
 }
 
 module.exports = function createAssetPackage({ urls, baseUrl }) {
-  return new Promise(async (resolve, reject) => {
+  // eslint-disable-next-line no-async-promise-executor
+  return new Promise(async (resolve) => {
     const archive = new Archiver('zip');
     archive.on('error', e => console.error(e));
 
@@ -54,6 +55,7 @@ module.exports = function createAssetPackage({ urls, baseUrl }) {
         }
         archive.append(fetchRes.body, {
           name: normalize(stripQueryParams(url), baseUrl),
+          date: FILE_CREATION_DATE,
         });
       });
 
