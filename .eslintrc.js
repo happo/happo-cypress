@@ -21,5 +21,7 @@ module.exports = {
     sourceType: 'module',
     ecmaVersion: 2018,
   },
-  rules: {},
+  rules: {
+    'no-use-before-define': 2,
+  },
 };
