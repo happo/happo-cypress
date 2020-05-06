@@ -46,7 +46,7 @@ function resolveLink(env) {
   return undefined;
 }
 
-function resolveMessage(env) {
+function resolveMessage() {
   const res = spawnSync('git', ['log', '-1', '--pretty=%s'], {
     encoding: 'utf-8',
   });
