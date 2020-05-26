@@ -6,6 +6,9 @@
   "repository": "git@github.com:happo/happo-cypress.git",
   "author": "Henric Trotzig <henric.trotzig@happo.io>",
   "license": "MIT",
+  "bin": {
+    "happo-cypress": "./bin/happo-cypress.js"
+  },
   "scripts": {
     "dev": "next --port 7654",
     "build": "next build",
