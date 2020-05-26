@@ -10,12 +10,21 @@ const compareReports = require('happo.io/build/commands/compareReports')
 const loadHappoConfig = require('../src/loadHappoConfig');
 const resolveEnvironment = require('../src/resolveEnvironment');
 
+const allRequestIds = new Set();
+
 function failWithMissingCommand() {
   console.error('Missing command. Usage: `happo-cypress -- cypress run`');
   process.exit(1);
 }
 
-const allRequestIds = new Set();
+function parsePort(argv) {
+  const i = argv.indexOf('--port');
+  if (i === -1) {
+    return 5338;
+  }
+  const port = argv[i + 1];
+  return parseInt(port, 10);
+}
 
 function requestHandler(req, res) {
   req.on('data', chunk => {
@@ -83,10 +92,10 @@ async function finalizeHappoReport() {
   }
 }
 
-function startServer(port = 5338) {
+function startServer(port) {
   const server = http.createServer(requestHandler);
   return new Promise(resolve => {
-    server.listen(5338, () => resolve(port));
+    server.listen(port, resolve);
   });
 }
 
@@ -96,16 +105,19 @@ async function init(argv) {
     failWithMissingCommand();
   }
 
-  const commandParts = argv.slice(argv.indexOf('--') + 1);
+  const commandParts = argv.slice(dashdashIndex + 1);
 
   if (!commandParts.length) {
     failWithMissingCommand();
   }
-  const serverPort = await startServer();
+
+  const serverPort = parsePort(argv.slice(0, dashdashIndex));
+  await startServer(serverPort);
   console.log(`[HAPPO] Listening on port ${serverPort}`);
 
   const child = spawn(commandParts[0], commandParts.slice(1), {
     stdio: 'inherit',
+    env: { ...process.env, HAPPO_CYPRESS_PORT: serverPort },
   });
 
   child.on('error', e => {

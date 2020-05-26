@@ -5,6 +5,8 @@ const findCSSAssetUrls = require('./src/findCSSAssetUrls');
 const loadHappoConfig = require('./src/loadHappoConfig');
 const makeAbsolute = require('./src/makeAbsolute');
 
+const { HAPPO_CYPRESS_PORT = 5338 } = process.env;
+
 let snapshots;
 let allCssBlocks;
 let snapshotAssetUrls;
@@ -108,7 +110,7 @@ module.exports = {
         allRequestIds.push(...requestIds);
       }),
     );
-    const fetchRes = await nodeFetch('http://localhost:5338/', {
+    const fetchRes = await nodeFetch(`http://localhost:${HAPPO_CYPRESS_PORT}/`, {
       method: 'POST',
       body: allRequestIds.join('\n'),
     });
