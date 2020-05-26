@@ -1,21 +1,16 @@
 const nodeFetch = require('node-fetch');
-const loadUserConfig = require('happo.io/build/loadUserConfig').default;
-const makeRequest = require('happo.io/build/makeRequest').default;
-const compareReports = require('happo.io/build/commands/compareReports')
-  .default;
 
 const createAssetPackage = require('./src/createAssetPackage');
 const findCSSAssetUrls = require('./src/findCSSAssetUrls');
+const loadHappoConfig = require('./src/loadHappoConfig');
 const makeAbsolute = require('./src/makeAbsolute');
-const resolveEnvironment = require('./src/resolveEnvironment');
 
 let snapshots;
 let allCssBlocks;
 let snapshotAssetUrls;
 let baseUrl;
 let happoConfig;
-let isEnabled;
-let knownComponentVariants;
+let knownComponentVariants = {};
 
 async function downloadCSSContent(blocks, baseUrl) {
   const promises = blocks.map(async block => {
@@ -54,7 +49,7 @@ module.exports = {
     component,
     variant: rawVariant,
   }) {
-    if (!isEnabled) {
+    if (!happoConfig) {
       return null;
     }
     const variant = dedupeVariant(component, rawVariant);
@@ -70,33 +65,19 @@ module.exports = {
   },
 
   async happoInit(options) {
-    try {
-      happoConfig = await loadUserConfig('./.happo.js');
-      isEnabled = true;
-    } catch (e) {
-      if (/You need an.*apiKey/.test(e.message)) {
-        isEnabled = false;
-        console.warn(
-          "[HAPPO] Happo is disabled since we couldn't find an `apiKey` and/or `apiSecret`",
-        );
-      } else {
-        throw e;
-      }
-    }
+    happoConfig = await loadHappoConfig();
     snapshots = [];
     allCssBlocks = [];
     snapshotAssetUrls = new Set();
     baseUrl = options.baseUrl;
-    knownComponentVariants = {};
     return null;
   },
 
   async happoTeardown() {
-    if (!isEnabled) {
+    if (!happoConfig) {
       return null;
     }
     if (!snapshots.length) {
-      console.log(`[HAPPO] No snapshots were recorded. Ignoring.`);
       return null;
     }
     await downloadCSSContent(allCssBlocks, baseUrl);
@@ -127,46 +108,16 @@ module.exports = {
         allRequestIds.push(...requestIds);
       }),
     );
-    const { beforeSha, afterSha, link, message } = resolveEnvironment();
-    const reportResult = await makeRequest(
-      {
-        url: `${happoConfig.endpoint}/api/async-reports/${afterSha}`,
-        method: 'POST',
-        json: true,
-        body: {
-          requestIds: allRequestIds,
-          project: happoConfig.project,
-        },
-      },
-      { ...happoConfig, maxTries: 3 },
-    );
-
-    if (beforeSha) {
-      const jobResult = await makeRequest(
-        {
-          url: `${happoConfig.endpoint}/api/jobs/${beforeSha}/${afterSha}`,
-          method: 'POST',
-          json: true,
-          body: {
-            project: happoConfig.project,
-            link,
-            message,
-          },
-        },
-        { ...happoConfig, maxTries: 3 },
+    const fetchRes = await nodeFetch('http://localhost:5338/', {
+      method: 'POST',
+      body: allRequestIds.join('\n'),
+    });
+    if (!fetchRes.ok) {
+      console.error(
+        `[HAPPO] Failed to communicate with happo-cypress process — ${fetchRes.statusText}`,
       );
-      if (beforeSha !== afterSha) {
-        await compareReports(beforeSha, afterSha, happoConfig, {
-          link,
-          message,
-          isAsync: true,
-        });
-      }
-      console.log(`[HAPPO] ${jobResult.url}`);
-    } else {
-      console.log(`[HAPPO] ${reportResult.url}`);
+      return;
     }
-
     return null;
   },
 };
