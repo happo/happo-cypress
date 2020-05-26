@@ -1,11 +1,13 @@
 const nodeFetch = require('node-fetch');
+const makeRequest = require('happo.io/build/makeRequest').default;
 
 const createAssetPackage = require('./src/createAssetPackage');
 const findCSSAssetUrls = require('./src/findCSSAssetUrls');
 const loadHappoConfig = require('./src/loadHappoConfig');
 const makeAbsolute = require('./src/makeAbsolute');
+const resolveEnvironment = require('./src/resolveEnvironment');
 
-const { HAPPO_CYPRESS_PORT = 5338 } = process.env;
+const { HAPPO_CYPRESS_PORT } = process.env;
 
 let snapshots;
 let allCssBlocks;
@@ -110,15 +112,37 @@ module.exports = {
         allRequestIds.push(...requestIds);
       }),
     );
-    const fetchRes = await nodeFetch(`http://localhost:${HAPPO_CYPRESS_PORT}/`, {
-      method: 'POST',
-      body: allRequestIds.join('\n'),
-    });
-    if (!fetchRes.ok) {
-      console.error(
-        `[HAPPO] Failed to communicate with happo-cypress process — ${fetchRes.statusText}`,
+    if (HAPPO_CYPRESS_PORT) {
+      // We're running with `happo-cypress --`
+      const fetchRes = await nodeFetch(
+        `http://localhost:${HAPPO_CYPRESS_PORT}/`,
+        {
+          method: 'POST',
+          body: allRequestIds.join('\n'),
+        },
       );
-      return;
+      if (!fetchRes.ok) {
+        throw new Error('Failed to communicate with happo-cypress server');
+      }
+    } else {
+      // We're not running with `happo-cypress --`. We'll create a report
+      // despite the fact that it might not contain all the snapshots. This is
+      // still helpful when running `cypress open` locally.
+      const { afterSha } = resolveEnvironment();
+      const reportResult = await makeRequest(
+        {
+          url: `${happoConfig.endpoint}/api/async-reports/${afterSha}`,
+          method: 'POST',
+          json: true,
+          body: {
+            requestIds: allRequestIds,
+            project: happoConfig.project,
+          },
+        },
+        { ...happoConfig, maxTries: 3 },
+      );
+      console.log(`[HAPPO] ${reportResult.url}`);
+      return null;
     }
     return null;
   },
