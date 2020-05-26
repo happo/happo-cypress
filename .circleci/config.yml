@@ -21,3 +21,4 @@ workflows:
       - cypress/run:
           yarn: true
           start: yarn dev
+          command-prefix: node bin/happo-cypress.js --
