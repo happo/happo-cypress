@@ -50,7 +50,7 @@ module.exports = function createAssetPackage({ urls, baseUrl }) {
       .map(async url => {
         const fetchRes = await nodeFetch(makeAbsolute(url, baseUrl));
         if (!fetchRes.ok) {
-          console.log(`Failed to fetch url ${url} — ${fetchRes.statusText}`);
+          console.log(`[HAPPO] Failed to fetch url ${url} — ${fetchRes.statusText}`);
           return;
         }
         archive.append(fetchRes.body, {
