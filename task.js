@@ -12,14 +12,26 @@ const { HAPPO_CYPRESS_PORT } = process.env;
 let snapshots;
 let allCssBlocks;
 let snapshotAssetUrls;
-let baseUrl;
 let happoConfig;
 let knownComponentVariants = {};
 
-async function downloadCSSContent(blocks, baseUrl) {
+function getUniqueUrls(urls) {
+  const seenKeys = new Set();
+  const result = [];
+  urls.forEach(url => {
+    const key = [url.url, url.baseUrl].join('||');
+    if (!seenKeys.has(key)) {
+      result.push(url);
+      seenKeys.add(key);
+    }
+  });
+  return urls;
+}
+
+async function downloadCSSContent(blocks) {
   const promises = blocks.map(async block => {
     if (block.href) {
-      const res = await nodeFetch(makeAbsolute(block.href, baseUrl));
+      const res = await nodeFetch(makeAbsolute(block.href, block.baseUrl));
       if (!res.ok) {
         console.warn(
           `[HAPPO] Failed to fetch CSS file from ${block.href}. This might mean styles are missing in your Happo screenshots`,
@@ -57,7 +69,7 @@ module.exports = {
       return null;
     }
     const variant = dedupeVariant(component, rawVariant);
-    assetUrls.forEach(url => snapshotAssetUrls.add(url));
+    snapshotAssetUrls.push(...assetUrls);
     snapshots.push({ html, component, variant });
     cssBlocks.forEach(block => {
       if (allCssBlocks.some(b => b.key === block.key)) {
@@ -68,12 +80,11 @@ module.exports = {
     return null;
   },
 
-  async happoInit(options) {
+  async happoInit() {
     happoConfig = await loadHappoConfig();
     snapshots = [];
     allCssBlocks = [];
-    snapshotAssetUrls = new Set();
-    baseUrl = options.baseUrl;
+    snapshotAssetUrls = [];
     return null;
   },
 
@@ -84,16 +95,16 @@ module.exports = {
     if (!snapshots.length) {
       return null;
     }
-    await downloadCSSContent(allCssBlocks, baseUrl);
-    const allUrls = new Set([...snapshotAssetUrls]);
+    await downloadCSSContent(allCssBlocks);
+    const allUrls = [...snapshotAssetUrls];
     allCssBlocks.forEach(block => {
-      findCSSAssetUrls(block.content).forEach(url => allUrls.add(url));
+      findCSSAssetUrls(block.content).forEach(url =>
+        allUrls.push({ url, baseUrl: block.baseUrl }),
+      );
     });
 
-    const assetsPackage = await createAssetPackage({
-      urls: [...allUrls],
-      baseUrl,
-    });
+    const uniqueUrls = getUniqueUrls(allUrls);
+    const assetsPackage = await createAssetPackage(uniqueUrls);
 
     const globalCSS = allCssBlocks.map(block => block.content).join('\n');
     const allRequestIds = [];

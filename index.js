@@ -5,9 +5,7 @@ const parseSrcset = require('parse-srcset');
 const findCSSAssetUrls = require('./src/findCSSAssetUrls');
 
 before(() => {
-  cy.task('happoInit', {
-    baseUrl: Cypress.config('baseUrl'),
-  });
+  cy.task('happoInit');
 });
 
 after(() => {
@@ -16,16 +14,17 @@ after(() => {
 
 const COMMENT_PATTERN = /^\/\*.+\*\/$/;
 
-function extractCSSChunks({ doc }) {
+function extractCSSBlocks({ doc }) {
   const blocks = [];
   const styleElements = doc.querySelectorAll(
     'style,link[rel="stylesheet"][href]',
   );
+  const baseUrl = doc.location.origin;
   styleElements.forEach(element => {
     if (element.tagName === 'LINK') {
       // <link href>
       const href = element.getAttribute('href');
-      blocks.push({ key: href, href });
+      blocks.push({ key: href, href, baseUrl });
     } else {
       // <style>
       const lines = Array.from(element.sheet.cssRules).map(r => r.cssText);
@@ -37,18 +36,15 @@ function extractCSSChunks({ doc }) {
         .join('\n');
 
       // Create a hash so that we can dedupe equal styles
-      const key = crypto
-        .createHash('md5')
-        .update(content)
-        .digest('hex');
+      const key = crypto.createHash('md5').update(content).digest('hex');
 
-      blocks.push({ content, key });
+      blocks.push({ content, key, baseUrl });
     }
   });
   return blocks;
 }
 
-function getSubjectAssetUrls(subject) {
+function getSubjectAssetUrls(subject, doc) {
   const allUrls = [];
   const allElements = [subject[0]].concat(
     Array.from(subject[0].querySelectorAll('*')),
@@ -67,7 +63,8 @@ function getSubjectAssetUrls(subject) {
       allUrls.push(...findCSSAssetUrls(style));
     }
   });
-  return allUrls;
+  const baseUrl = doc.location.origin;
+  return allUrls.map(url => ({ url, baseUrl }));
 }
 
 Cypress.Commands.add(
@@ -79,7 +76,7 @@ Cypress.Commands.add(
     cy.document().then(doc => {
       const html = subject.prop('outerHTML');
       const assetUrls = getSubjectAssetUrls(subject, doc);
-      const cssBlocks = extractCSSChunks({ doc });
+      const cssBlocks = extractCSSBlocks({ doc });
       cy.task('happoRegisterSnapshot', {
         html,
         cssBlocks,
