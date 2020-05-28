@@ -25,9 +25,9 @@ function normalize(url, baseUrl) {
   }
 }
 
-module.exports = function createAssetPackage({ urls, baseUrl }) {
+module.exports = function createAssetPackage(urls) {
   // eslint-disable-next-line no-async-promise-executor
-  return new Promise(async (resolve) => {
+  return new Promise(async resolve => {
     const archive = new Archiver('zip');
     archive.on('error', e => console.error(e));
 
@@ -46,11 +46,15 @@ module.exports = function createAssetPackage({ urls, baseUrl }) {
     archive.pipe(stream);
 
     const promises = urls
-      .filter(url => url.startsWith('/') || url.startsWith(baseUrl))
-      .map(async url => {
+      .filter(
+        ({ url, baseUrl }) => url.startsWith('/') || url.startsWith(baseUrl),
+      )
+      .map(async ({ url, baseUrl }) => {
         const fetchRes = await nodeFetch(makeAbsolute(url, baseUrl));
         if (!fetchRes.ok) {
-          console.log(`[HAPPO] Failed to fetch url ${url} — ${fetchRes.statusText}`);
+          console.log(
+            `[HAPPO] Failed to fetch url ${url} — ${fetchRes.statusText}`,
+          );
           return;
         }
         archive.append(fetchRes.body, {
