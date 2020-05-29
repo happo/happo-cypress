@@ -64,13 +64,14 @@ module.exports = {
     cssBlocks,
     component,
     variant: rawVariant,
+    targets,
   }) {
     if (!happoConfig) {
       return null;
     }
     const variant = dedupeVariant(component, rawVariant);
     snapshotAssetUrls.push(...assetUrls);
-    snapshots.push({ html, component, variant });
+    snapshots.push({ html, component, variant, targets });
     cssBlocks.forEach(block => {
       if (allCssBlocks.some(b => b.key === block.key)) {
         return;
@@ -110,13 +111,16 @@ module.exports = {
     const allRequestIds = [];
     await Promise.all(
       Object.keys(happoConfig.targets).map(async name => {
+        const snapshotsForTarget = snapshots.filter(
+          ({ targets }) => !targets || targets.includes(name),
+        );
         const requestIds = await happoConfig.targets[name].execute({
           targetName: name,
           asyncResults: true,
           endpoint: happoConfig.endpoint,
           globalCSS,
           assetsPackage,
-          snapPayloads: snapshots,
+          snapPayloads: snapshotsForTarget,
           apiKey: happoConfig.apiKey,
           apiSecret: happoConfig.apiSecret,
         });
