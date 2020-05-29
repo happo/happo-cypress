@@ -83,6 +83,7 @@ Cypress.Commands.add(
         assetUrls,
         component,
         variant,
+        targets: options.targets,
       });
     });
   },

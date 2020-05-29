@@ -8,6 +8,7 @@ describe('The Home Page', () => {
     cy.get('.button').happoScreenshot({
       component: 'Button',
       variant: 'default',
+      targets: ['chromeSmall'],
     });
 
     cy.get('.images').happoScreenshot({
