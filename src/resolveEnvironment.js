@@ -123,5 +123,6 @@ module.exports = function resolveEnvironment(env = process.env) {
     message: /^dev-/.test(afterSha) ? undefined : resolveMessage(env),
     beforeSha: resolveBeforeSha(env, afterSha),
     afterSha,
+    nonce: env.HAPPO_NONCE,
   };
 };
