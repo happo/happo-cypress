@@ -35,7 +35,7 @@ workflows:
             - cypress/install
           yarn: true
           start: yarn dev
-          command-prefix: node bin/happo-cypress.js -- yarn cypress run
+          command-prefix: node bin/happo-cypress.js -- yarn
       - cypress/run:
           name: cypress-parallel
           requires:
