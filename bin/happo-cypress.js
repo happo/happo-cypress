@@ -53,7 +53,7 @@ async function finalizeAll() {
   if (!nonce) {
     throw new Error('[HAPPO] Missing HAPPO_NONCE environment variable');
   }
-  const finalizeResult = await makeRequest(
+  await makeRequest(
     {
       url: `${happoConfig.endpoint}/api/async-reports/${afterSha}/finalize`,
       method: 'POST',
@@ -67,7 +67,7 @@ async function finalizeAll() {
   );
 
   if (beforeSha && beforeSha !== afterSha) {
-    const compareResult = await compareReports(beforeSha, afterSha, happoConfig, {
+    await compareReports(beforeSha, afterSha, happoConfig, {
       link,
       message,
       isAsync: true,
@@ -138,7 +138,7 @@ function startServer(port) {
 async function init(argv) {
   const dashdashIndex = argv.indexOf('--');
   if (dashdashIndex === -1) {
-    const isFinalizeCommand = argv[argv.length -1] === 'finalize';
+    const isFinalizeCommand = argv[argv.length - 1] === 'finalize';
     if (isFinalizeCommand) {
       await finalizeAll();
       return;
@@ -175,7 +175,7 @@ async function init(argv) {
   });
 }
 
-init(process.argv).catch((e) => {
+init(process.argv).catch(e => {
   console.error(e);
   process.exit(1);
-});;
+});
