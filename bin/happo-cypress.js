@@ -13,7 +13,10 @@ const resolveEnvironment = require('../src/resolveEnvironment');
 const allRequestIds = new Set();
 
 function failWithMissingCommand() {
-  console.error('Missing command. Usage: `happo-cypress -- cypress run`');
+  console.error(`Missing command. Usage examples:\n
+  happo-cypress -- cypress run
+  happo-cypress finalize
+  `);
   process.exit(1);
 }
 
@@ -40,6 +43,38 @@ function requestHandler(req, res) {
   });
 }
 
+async function finalizeAll() {
+  const happoConfig = await loadHappoConfig();
+  if (!happoConfig) {
+    return;
+  }
+
+  const { beforeSha, afterSha, link, message, nonce } = resolveEnvironment();
+  if (!nonce) {
+    throw new Error('[HAPPO] Missing HAPPO_NONCE environment variable');
+  }
+  const finalizeResult = await makeRequest(
+    {
+      url: `${happoConfig.endpoint}/api/async-reports/${afterSha}/finalize`,
+      method: 'POST',
+      json: true,
+      body: {
+        project: happoConfig.project,
+        nonce,
+      },
+    },
+    { ...happoConfig, maxTries: 3 },
+  );
+
+  if (beforeSha && beforeSha !== afterSha) {
+    const compareResult = await compareReports(beforeSha, afterSha, happoConfig, {
+      link,
+      message,
+      isAsync: true,
+    });
+  }
+}
+
 async function finalizeHappoReport() {
   const happoConfig = await loadHappoConfig();
   if (!happoConfig) {
@@ -51,7 +86,7 @@ async function finalizeHappoReport() {
     return;
   }
 
-  const { beforeSha, afterSha, link, message } = resolveEnvironment();
+  const { beforeSha, afterSha, link, message, nonce } = resolveEnvironment();
   const reportResult = await makeRequest(
     {
       url: `${happoConfig.endpoint}/api/async-reports/${afterSha}`,
@@ -60,6 +95,7 @@ async function finalizeHappoReport() {
       body: {
         requestIds: [...allRequestIds],
         project: happoConfig.project,
+        nonce,
       },
     },
     { ...happoConfig, maxTries: 3 },
@@ -79,7 +115,7 @@ async function finalizeHappoReport() {
       },
       { ...happoConfig, maxTries: 3 },
     );
-    if (beforeSha !== afterSha) {
+    if (beforeSha !== afterSha && !nonce) {
       await compareReports(beforeSha, afterSha, happoConfig, {
         link,
         message,
@@ -102,6 +138,11 @@ function startServer(port) {
 async function init(argv) {
   const dashdashIndex = argv.indexOf('--');
   if (dashdashIndex === -1) {
+    const isFinalizeCommand = argv[argv.length -1] === 'finalize';
+    if (isFinalizeCommand) {
+      await finalizeAll();
+      return;
+    }
     failWithMissingCommand();
   }
 
@@ -134,4 +175,7 @@ async function init(argv) {
   });
 }
 
-init(process.argv);
+init(process.argv).catch((e) => {
+  console.error(e);
+  process.exit(1);
+});;
