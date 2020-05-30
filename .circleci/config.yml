@@ -20,7 +20,7 @@ jobs:
       - node/with-cache:
           steps:
             - run: yarn install
-            - run: "HAPPO_NONCE=${CIRCLE_WORKFLOW_ID} node bin/happo-cypress.js finalize"
+            - run: "HAPPO_PROJECT=parallel HAPPO_NONCE=${CIRCLE_WORKFLOW_ID} node bin/happo-cypress.js finalize"
 workflows:
   build-and-test:
     jobs:
