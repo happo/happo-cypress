@@ -20,7 +20,7 @@ jobs:
       - node/with-cache:
           steps:
             - run: yarn install
-            - run: "HAPPO_NONCE=${CIRCLE_BUILD_NUM} node bin/happo-cypress.js finalize"
+            - run: "HAPPO_NONCE=${CIRCLE_WORKFLOW_ID} node bin/happo-cypress.js finalize"
 workflows:
   build-and-test:
     jobs:
@@ -43,7 +43,7 @@ workflows:
           parallel: true
           parallelism: 2
           record: true
-          command-prefix: "HAPPO_PROJECT=parallel HAPPO_NONCE=${CIRCLE_BUILD_NUM} node bin/happo-cypress.js -- yarn"
+          command-prefix: "HAPPO_PROJECT=parallel HAPPO_NONCE=${CIRCLE_WORKFLOW_ID} node bin/happo-cypress.js -- yarn"
       - finalize-happo:
           requires:
             - cypress/run
