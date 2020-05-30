@@ -27,14 +27,14 @@ workflows:
       - build-and-test
   cypress:
     jobs:
+      - cypress/install:
+          yarn: true
       - cypress/run:
+          requires:
+            - cypress/install
           yarn: true
           start: yarn dev
           command-prefix: node bin/happo-cypress.js -- yarn cypress run
-  cypress-parallel:
-    jobs:
-      - cypress/install:
-          yarn: true
       - cypress/run:
           requires:
             - cypress/install
