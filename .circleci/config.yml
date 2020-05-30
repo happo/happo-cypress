@@ -24,7 +24,8 @@ workflows:
           command: node bin/happo-cypress.js -- yarn cypress run
   cypress-parallel:
     jobs:
-      - cypress/install
+      - cypress/install:
+          yarn: true
       - cypress/run:
           requires:
             - cypress/install
