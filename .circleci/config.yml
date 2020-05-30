@@ -34,4 +34,4 @@ workflows:
           parallel: true
           parallelism: 2
           record: true
-          command: HAPPO_PROJECT=parallel node bin/happo-cypress.js -- yarn cypress run
+          command-prefix: HAPPO_PROJECT=parallel node bin/happo-cypress.js -- yarn
