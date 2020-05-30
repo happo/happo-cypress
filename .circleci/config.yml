@@ -30,12 +30,14 @@ workflows:
       - cypress/install:
           yarn: true
       - cypress/run:
+          name: cypress-serial
           requires:
             - cypress/install
           yarn: true
           start: yarn dev
           command-prefix: node bin/happo-cypress.js -- yarn cypress run
       - cypress/run:
+          name: cypress-parallel
           requires:
             - cypress/install
           yarn: true
@@ -46,4 +48,4 @@ workflows:
           command-prefix: "HAPPO_PROJECT=parallel HAPPO_NONCE=${CIRCLE_WORKFLOW_ID} node bin/happo-cypress.js -- yarn"
       - finalize-happo:
           requires:
-            - cypress/run
+            - cypress-parallel
