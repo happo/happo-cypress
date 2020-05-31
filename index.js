@@ -75,6 +75,7 @@ function inlineCanvases(doc, subject) {
   canvases.push(...Array.from(subject.querySelectorAll('canvas')));
 
   let newSubject = subject;
+  const replacements = [];
   for (const canvas of canvases) {
     const image = doc.createElement('img');
     const canvasImageBase64 = canvas.toDataURL('image/png');
@@ -87,8 +88,15 @@ function inlineCanvases(doc, subject) {
       // we return the modified subject.
       newSubject = image;
     }
+    replacements.push({ from: canvas, to: image });
   }
-  return newSubject;
+
+  function cleanup() {
+    for (const { from, to } of replacements) {
+      to.replaceWith(from);
+    }
+  }
+  return { subject: newSubject, cleanup };
 }
 
 Cypress.Commands.add(
@@ -98,7 +106,7 @@ Cypress.Commands.add(
     const component = options.component || cy.state('runnable').fullTitle();
     const variant = options.variant || 'default';
     cy.document().then(doc => {
-      const subject = inlineCanvases(doc, originalSubject[0]);
+      const { subject, cleanup } = inlineCanvases(doc, originalSubject[0]);
       const html = subject.outerHTML;
       const assetUrls = getSubjectAssetUrls(subject, doc);
       const cssBlocks = extractCSSBlocks({ doc });
@@ -110,6 +118,7 @@ Cypress.Commands.add(
         variant,
         targets: options.targets,
       });
+      cleanup();
     });
   },
 );
