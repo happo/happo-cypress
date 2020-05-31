@@ -12,7 +12,7 @@ function CanvasImage() {
     ctx.fillText('Hello World', 20, 50);
   });
 
-  return <canvas ref={ref} width="200" height="100" />;
+  return <canvas style={{ padding: 20 }} ref={ref} width="200" height="100" />;
 }
 
 export default function IndexPage() {

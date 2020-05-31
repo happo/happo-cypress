@@ -79,8 +79,12 @@ function inlineCanvases(doc, subject) {
     const image = doc.createElement('img');
     const canvasImageBase64 = canvas.toDataURL('image/png');
     image.src = canvasImageBase64;
+    const style = window.getComputedStyle(canvas, '');
+    image.style.cssText = style.cssText;
     canvas.replaceWith(image);
     if (canvas === subject) {
+      // We're inlining the subject (the `cy.get('canvas')` element). Make sure
+      // we return the modified subject.
       newSubject = image;
     }
   }
