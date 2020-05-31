@@ -22,6 +22,13 @@ describe('The Home Page', () => {
     cy.get('.button').happoScreenshot();
     cy.get('.button').happoScreenshot();
 
-    cy.get('canvas').happoScreenshot({ component: 'Canvas' });
+    cy.get('[data-test="untainted-canvas"]').happoScreenshot({
+      component: 'Canvas',
+      variant: 'untainted',
+    });
+    cy.get('[data-test="tainted-canvas"]').happoScreenshot({
+      component: 'Canvas',
+      variant: 'tainted',
+    });
   });
 });

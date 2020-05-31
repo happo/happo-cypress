@@ -78,17 +78,26 @@ function inlineCanvases(doc, subject) {
   const replacements = [];
   for (const canvas of canvases) {
     const image = doc.createElement('img');
-    const canvasImageBase64 = canvas.toDataURL('image/png');
-    image.src = canvasImageBase64;
-    const style = window.getComputedStyle(canvas, '');
-    image.style.cssText = style.cssText;
-    canvas.replaceWith(image);
-    if (canvas === subject) {
-      // We're inlining the subject (the `cy.get('canvas')` element). Make sure
-      // we return the modified subject.
-      newSubject = image;
+    try {
+      const canvasImageBase64 = canvas.toDataURL('image/png');
+      image.src = canvasImageBase64;
+      const style = window.getComputedStyle(canvas, '');
+      image.style.cssText = style.cssText;
+      canvas.replaceWith(image);
+      if (canvas === subject) {
+        // We're inlining the subject (the `cy.get('canvas')` element). Make sure
+        // we return the modified subject.
+        newSubject = image;
+      }
+      replacements.push({ from: canvas, to: image });
+    } catch (e) {
+      if (e.name === 'SecurityError') {
+        console.warn('[HAPPO] Failed to convert tainted canvas to PNG image');
+        console.warn(e);
+      } else {
+        throw e;
+      }
     }
-    replacements.push({ from: canvas, to: image });
   }
 
   function cleanup() {
