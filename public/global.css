@@ -15,3 +15,7 @@ body {
 button {
   font-family: 'CustomFont';
 }
+
+canvas {
+  border: 2px solid red;
+}
