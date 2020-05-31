@@ -46,8 +46,8 @@ function extractCSSBlocks({ doc }) {
 
 function getSubjectAssetUrls(subject, doc) {
   const allUrls = [];
-  const allElements = [subject[0]].concat(
-    Array.from(subject[0].querySelectorAll('*')),
+  const allElements = [subject].concat(
+    Array.from(subject.querySelectorAll('*')),
   );
   allElements.forEach(element => {
     const srcset = element.getAttribute('srcset');
@@ -67,14 +67,35 @@ function getSubjectAssetUrls(subject, doc) {
   return allUrls.map(url => ({ url, baseUrl }));
 }
 
+function inlineCanvases(doc, subject) {
+  const canvases = [];
+  if (subject.tagName === 'CANVAS') {
+    canvases.push(subject);
+  }
+  canvases.push(...Array.from(subject.querySelectorAll('canvas')));
+
+  let newSubject = subject;
+  for (const canvas of canvases) {
+    const image = doc.createElement('img');
+    const canvasImageBase64 = canvas.toDataURL('image/png');
+    image.src = canvasImageBase64;
+    canvas.replaceWith(image);
+    if (canvas === subject) {
+      newSubject = image;
+    }
+  }
+  return newSubject;
+}
+
 Cypress.Commands.add(
   'happoScreenshot',
   { prevSubject: true },
-  (subject, options = {}) => {
+  (originalSubject, options = {}) => {
     const component = options.component || cy.state('runnable').fullTitle();
     const variant = options.variant || 'default';
     cy.document().then(doc => {
-      const html = subject.prop('outerHTML');
+      const subject = inlineCanvases(doc, originalSubject[0]);
+      const html = subject.outerHTML;
       const assetUrls = getSubjectAssetUrls(subject, doc);
       const cssBlocks = extractCSSBlocks({ doc });
       cy.task('happoRegisterSnapshot', {

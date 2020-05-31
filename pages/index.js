@@ -1,4 +1,19 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
+
+function CanvasImage() {
+  const ref = useRef();
+  useEffect(() => {
+    const ctx = ref.current.getContext('2d');
+    ctx.moveTo(0, 0);
+    ctx.lineTo(200, 100);
+    ctx.stroke();
+    ctx.font = '30px Arial';
+    ctx.rotate(0.25);
+    ctx.fillText('Hello World', 20, 50);
+  });
+
+  return <canvas ref={ref} width="200" height="100" />;
+}
 
 export default function IndexPage() {
   useEffect(() => {
@@ -10,6 +25,7 @@ export default function IndexPage() {
 
   return (
     <div>
+      <CanvasImage />
       <div className="card">
         <h1>I'm a card</h1>
         <img src="/hotel.jpg" />
