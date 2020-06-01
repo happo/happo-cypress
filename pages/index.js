@@ -12,7 +12,37 @@ function CanvasImage() {
     ctx.fillText('Hello World', 20, 50);
   });
 
-  return <canvas style={{ padding: 20 }} ref={ref} width="200" height="100" />;
+  return (
+    <canvas
+      data-test="untainted-canvas"
+      style={{ padding: 20 }}
+      ref={ref}
+      width="200"
+      height="100"
+    />
+  );
+}
+
+function TaintedCanvasImage() {
+  const ref = useRef();
+  useEffect(() => {
+    const ctx = ref.current.getContext('2d');
+    const img = new Image();
+    img.addEventListener('load', () => {
+      ctx.drawImage(img, 0, 0);
+    });
+    img.src = 'https://placekitten.com/100/100';
+  });
+
+  return (
+    <canvas
+      data-test="tainted-canvas"
+      style={{ padding: 20 }}
+      ref={ref}
+      width="200"
+      height="100"
+    />
+  );
 }
 
 export default function IndexPage() {
@@ -26,6 +56,7 @@ export default function IndexPage() {
   return (
     <div>
       <CanvasImage />
+      <TaintedCanvasImage />
       <div className="card">
         <h1>I'm a card</h1>
         <img src="/hotel.jpg" />
