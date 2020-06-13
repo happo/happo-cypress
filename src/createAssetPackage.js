@@ -28,6 +28,7 @@ function normalize(url, baseUrl) {
 module.exports = function createAssetPackage(urls) {
   // eslint-disable-next-line no-async-promise-executor
   return new Promise(async resolve => {
+    const seenUrls = new Set();
     const archive = new Archiver('zip');
     archive.on('error', e => console.error(e));
 
@@ -47,20 +48,35 @@ module.exports = function createAssetPackage(urls) {
 
     const promises = urls
       .filter(
-        ({ url, baseUrl }) => url.startsWith('/') || url.startsWith(baseUrl),
+        ({ url, baseUrl, base64Url }) =>
+          base64Url || url.startsWith('/') || url.startsWith(baseUrl),
       )
-      .map(async ({ url, baseUrl }) => {
-        const fetchRes = await nodeFetch(makeAbsolute(url, baseUrl));
-        if (!fetchRes.ok) {
-          console.log(
-            `[HAPPO] Failed to fetch url ${url} — ${fetchRes.statusText}`,
-          );
+      .map(async ({ url, baseUrl, base64Url }) => {
+        const name = normalize(stripQueryParams(url), baseUrl);
+        if (seenUrls.has(name)) {
+          // already processed
           return;
         }
-        archive.append(fetchRes.body, {
-          name: normalize(stripQueryParams(url), baseUrl),
-          date: FILE_CREATION_DATE,
-        });
+        seenUrls.add(name);
+        if (base64Url) {
+          const data = base64Url.split(',')[1];
+          archive.append(Buffer.from(data, 'base64'), {
+            name,
+            date: FILE_CREATION_DATE,
+          });
+        } else {
+          const fetchRes = await nodeFetch(makeAbsolute(url, baseUrl));
+          if (!fetchRes.ok) {
+            console.log(
+              `[HAPPO] Failed to fetch url ${url} — ${fetchRes.statusText}`,
+            );
+            return;
+          }
+          archive.append(fetchRes.body, {
+            name,
+            date: FILE_CREATION_DATE,
+          });
+        }
       });
 
     await Promise.all(promises);

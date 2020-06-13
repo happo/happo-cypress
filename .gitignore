@@ -1,3 +1,4 @@
 node_modules
 .next
 cypress/videos
+.DS_Store
