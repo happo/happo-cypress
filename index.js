@@ -37,7 +37,6 @@ function extractCSSBlocks({ doc }) {
 
       // Create a hash so that we can dedupe equal styles
       const key = crypto.createHash('md5').update(content).digest('hex');
-
       blocks.push({ content, key, baseUrl });
     }
   });
@@ -49,22 +48,30 @@ function getSubjectAssetUrls(subject, doc) {
   const allElements = [subject].concat(
     Array.from(subject.querySelectorAll('*')),
   );
+  const baseUrl = doc.location.origin;
   allElements.forEach(element => {
+    if (element.tagName === 'SCRIPT') {
+      // skip script elements
+      return;
+    }
     const srcset = element.getAttribute('srcset');
     const src = element.getAttribute('src');
     const style = element.getAttribute('style');
+    const base64Url = element._base64Url;
+    if (base64Url) {
+      allUrls.push({ url: src, baseUrl, base64Url });
+    }
     if (src) {
-      allUrls.push(src);
+      allUrls.push({ url: src, baseUrl });
     }
     if (srcset) {
-      allUrls.push(...parseSrcset(srcset).map(p => p.url));
+      allUrls.push(...parseSrcset(srcset).map(p => ({ url: p.url, baseUrl })));
     }
     if (style) {
-      allUrls.push(...findCSSAssetUrls(style));
+      allUrls.push(...findCSSAssetUrls(style).map(url => ({ url, baseUrl })));
     }
   });
-  const baseUrl = doc.location.origin;
-  return allUrls.map(url => ({ url, baseUrl }));
+  return allUrls;
 }
 
 function inlineCanvases(doc, subject) {
@@ -80,7 +87,13 @@ function inlineCanvases(doc, subject) {
     const image = doc.createElement('img');
     try {
       const canvasImageBase64 = canvas.toDataURL('image/png');
-      image.src = canvasImageBase64;
+
+      const url = `/_inlined/${crypto
+        .createHash('md5')
+        .update(canvasImageBase64)
+        .digest('hex')}.png`;
+      image.src = url;
+      image._base64Url = canvasImageBase64;
       const style = window.getComputedStyle(canvas, '');
       image.style.cssText = style.cssText;
       canvas.replaceWith(image);
@@ -108,6 +121,24 @@ function inlineCanvases(doc, subject) {
   return { subject: newSubject, cleanup };
 }
 
+function transformDOM({ doc, selector, transform, subject }) {
+  const elements = Array.from(subject.querySelectorAll(selector));
+  if (!elements.length) {
+    return;
+  }
+  const replacements = [];
+  for (const element of elements) {
+    const replacement = transform(element, doc);
+    replacements.push({ from: element, to: replacement });
+    element.replaceWith(replacement);
+  }
+  return () => {
+    for (const { from, to } of replacements) {
+      to.replaceWith(from);
+    }
+  };
+}
+
 Cypress.Commands.add(
   'happoScreenshot',
   { prevSubject: true },
@@ -115,7 +146,19 @@ Cypress.Commands.add(
     const component = options.component || cy.state('runnable').fullTitle();
     const variant = options.variant || 'default';
     cy.document().then(doc => {
-      const { subject, cleanup } = inlineCanvases(doc, originalSubject[0]);
+      const { subject, cleanup: canvasCleanup } = inlineCanvases(
+        doc,
+        originalSubject[0],
+      );
+
+      const transformCleanup = options.transformDOM
+        ? transformDOM({
+            doc,
+            subject,
+            ...options.transformDOM,
+          })
+        : undefined;
+
       const html = subject.outerHTML;
       const assetUrls = getSubjectAssetUrls(subject, doc);
       const cssBlocks = extractCSSBlocks({ doc });
@@ -127,7 +170,10 @@ Cypress.Commands.add(
         variant,
         targets: options.targets,
       });
-      cleanup();
+      if (transformCleanup) {
+        transformCleanup();
+      }
+      canvasCleanup();
     });
   },
 );

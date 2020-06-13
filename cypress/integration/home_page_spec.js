@@ -3,6 +3,30 @@ describe('The Home Page', () => {
     cy.visit('/');
     cy.wait(100);
     cy.get('body').happoScreenshot({ component: 'Full-page' });
+    cy.get('body').happoScreenshot({
+      component: 'Full-page',
+      variant: 'replaced-card',
+      transformDOM: {
+        selector: '.card',
+        transform: (element, doc) => {
+          const div = doc.createElement('div');
+          div.innerHTML = 'Hello world!';
+          return div;
+        }
+      },
+    });
+    cy.get('body').happoScreenshot({
+      component: 'Full-page',
+      variant: 'replaced-images',
+      transformDOM: {
+        selector: '.images img',
+        transform: (element, doc) => {
+          const div = doc.createElement('div');
+          div.innerHTML = `Hello ${element.src}`;
+          return div;
+        }
+      },
+    });
     cy.get('.card').happoScreenshot({ component: 'Card' });
 
     cy.visit('/');
