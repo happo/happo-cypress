@@ -121,6 +121,24 @@ function inlineCanvases(doc, subject) {
   return { subject: newSubject, cleanup };
 }
 
+function transformDOM({ doc, selector, transform, subject }) {
+  const elements = Array.from(subject.querySelectorAll(selector));
+  if (!elements.length) {
+    return;
+  }
+  const replacements = [];
+  for (const element of elements) {
+    const replacement = transform(element, doc);
+    replacements.push({ from: element, to: replacement });
+    element.replaceWith(replacement);
+  }
+  return () => {
+    for (const { from, to } of replacements) {
+      to.replaceWith(from);
+    }
+  };
+}
+
 Cypress.Commands.add(
   'happoScreenshot',
   { prevSubject: true },
@@ -128,7 +146,19 @@ Cypress.Commands.add(
     const component = options.component || cy.state('runnable').fullTitle();
     const variant = options.variant || 'default';
     cy.document().then(doc => {
-      const { subject, cleanup } = inlineCanvases(doc, originalSubject[0]);
+      const { subject, cleanup: canvasCleanup } = inlineCanvases(
+        doc,
+        originalSubject[0],
+      );
+
+      const transformCleanup = options.transformDOM
+        ? transformDOM({
+            doc,
+            subject,
+            ...options.transformDOM,
+          })
+        : undefined;
+
       const html = subject.outerHTML;
       const assetUrls = getSubjectAssetUrls(subject, doc);
       const cssBlocks = extractCSSBlocks({ doc });
@@ -140,7 +170,10 @@ Cypress.Commands.add(
         variant,
         targets: options.targets,
       });
-      cleanup();
+      if (transformCleanup) {
+        transformCleanup();
+      }
+      canvasCleanup();
     });
   },
 );
