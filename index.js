@@ -50,6 +50,10 @@ function getSubjectAssetUrls(subject, doc) {
   );
   const baseUrl = doc.location.origin;
   allElements.forEach(element => {
+    if (element.tagName === 'SCRIPT') {
+      // skip script elements
+      return;
+    }
     const srcset = element.getAttribute('srcset');
     const src = element.getAttribute('src');
     const style = element.getAttribute('style');
