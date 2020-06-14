@@ -23,21 +23,33 @@ function failWithMissingCommand() {
 function parsePort(argv) {
   const i = argv.indexOf('--port');
   if (i === -1) {
-    return 5338;
+    return 5339;
   }
   const port = argv[i + 1];
   return parseInt(port, 10);
 }
 
 function requestHandler(req, res) {
+  const bodyParts = [];
   req.on('data', chunk => {
-    chunk
-      .toString()
-      .split('\n')
-      .filter(Boolean)
-      .forEach(requestId => allRequestIds.add(parseInt(requestId, 10)));
+    bodyParts.push(chunk.toString());
   });
   req.on('end', () => {
+    const potentialIds = bodyParts
+      .join('')
+      .split('\n')
+      .filter(Boolean)
+      .map(requestId => parseInt(requestId, 10));
+
+    if (potentialIds.some(id => isNaN(id))) {
+      res.writeHead(400);
+      res.end('invalid payload');
+      return;
+    }
+
+    potentialIds.forEach(requestId => {
+      allRequestIds.add(parseInt(requestId, 10));
+    });
     res.writeHead(200);
     res.end('');
   });
@@ -168,7 +180,12 @@ async function init(argv) {
 
   child.on('close', async code => {
     if (code === 0) {
-      await finalizeHappoReport();
+      try {
+        await finalizeHappoReport();
+      } catch (e) {
+        console.error('Failed to finalize Happo report', e);
+        process.exit(1);
+      }
     }
 
     process.exit(code);
