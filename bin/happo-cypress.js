@@ -30,14 +30,26 @@ function parsePort(argv) {
 }
 
 function requestHandler(req, res) {
+  const bodyParts = [];
   req.on('data', chunk => {
-    chunk
-      .toString()
-      .split('\n')
-      .filter(Boolean)
-      .forEach(requestId => allRequestIds.add(parseInt(requestId, 10)));
+    bodyParts.push(chunk.toString());
   });
   req.on('end', () => {
+    const potentialIds = bodyParts
+      .join('')
+      .split('\n')
+      .filter(Boolean)
+      .map(requestId => parseInt(requestId, 10));
+
+    if (potentialIds.some(id => isNaN(id))) {
+      res.writeHead(400);
+      res.end('invalid payload');
+      return;
+    }
+
+    potentialIds.forEach(requestId => {
+      allRequestIds.add(parseInt(requestId, 10));
+    });
     res.writeHead(200);
     res.end('');
   });
