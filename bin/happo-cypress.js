@@ -180,7 +180,12 @@ async function init(argv) {
 
   child.on('close', async code => {
     if (code === 0) {
-      await finalizeHappoReport();
+      try {
+        await finalizeHappoReport();
+      } catch (e) {
+        console.error('Failed to finalize Happo report', e);
+        process.exit(1);
+      }
     }
 
     process.exit(code);
