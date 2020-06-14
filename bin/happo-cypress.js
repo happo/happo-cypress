@@ -23,7 +23,7 @@ function failWithMissingCommand() {
 function parsePort(argv) {
   const i = argv.indexOf('--port');
   if (i === -1) {
-    return 5338;
+    return 5339;
   }
   const port = argv[i + 1];
   return parseInt(port, 10);
