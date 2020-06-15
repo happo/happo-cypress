@@ -105,7 +105,25 @@ module.exports = {
     });
 
     const uniqueUrls = getUniqueUrls(allUrls);
-    const assetsPackage = await createAssetPackage(uniqueUrls);
+    const { buffer, hash } = await createAssetPackage(uniqueUrls);
+
+    const assetsRes = await makeRequest(
+      {
+        url: `${happoConfig.endpoint}/api/snap-requests/assets/${hash}`,
+        method: 'POST',
+        json: true,
+        formData: {
+          payload: {
+            options: {
+              filename: 'payload.zip',
+              contentType: 'application/zip',
+            },
+            value: buffer,
+          },
+        },
+      },
+      { ...happoConfig, maxTries: 3 },
+    );
 
     const globalCSS = allCssBlocks.map(block => block.content).join('\n');
     const allRequestIds = [];
@@ -119,7 +137,7 @@ module.exports = {
           asyncResults: true,
           endpoint: happoConfig.endpoint,
           globalCSS,
-          assetsPackage,
+          assetsPackage: assetsRes.path,
           snapPayloads: snapshotsForTarget,
           apiKey: happoConfig.apiKey,
           apiSecret: happoConfig.apiSecret,
