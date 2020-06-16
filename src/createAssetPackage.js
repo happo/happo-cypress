@@ -1,6 +1,8 @@
-const { Writable } = require('stream');
-const nodeFetch = require('node-fetch');
+const crypto = require('crypto');
 const Archiver = require('archiver');
+const nodeFetch = require('node-fetch');
+
+const { Writable } = require('stream');
 
 const makeAbsolute = require('./makeAbsolute');
 
@@ -42,7 +44,8 @@ module.exports = function createAssetPackage(urls) {
     stream.on('error', e => console.error(e));
     stream.on('finish', () => {
       const buffer = Buffer.from(data);
-      resolve(buffer);
+      const hash = crypto.createHash('md5').update(buffer).digest('hex');
+      resolve({ buffer, hash });
     });
     archive.pipe(stream);
 
