@@ -94,8 +94,14 @@ function inlineCanvases(doc, subject) {
         .digest('hex')}.png`;
       image.src = url;
       image._base64Url = canvasImageBase64;
-      const style = window.getComputedStyle(canvas, '');
-      image.style.cssText = style.cssText;
+      const style = canvas.getAttribute('style');
+      const className = canvas.getAttribute('class');
+      const width = canvas.getAttribute('width');
+      const height = canvas.getAttribute('height');
+      image.setAttribute('style', style);
+      image.setAttribute('class', className);
+      image.setAttribute('width', width);
+      image.setAttribute('height', height);
       canvas.replaceWith(image);
       if (canvas === subject) {
         // We're inlining the subject (the `cy.get('canvas')` element). Make sure

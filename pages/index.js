@@ -14,6 +14,7 @@ function CanvasImage() {
 
   return (
     <canvas
+      className="canvas"
       data-test="untainted-canvas"
       style={{ padding: 20 }}
       ref={ref}
@@ -36,6 +37,7 @@ function TaintedCanvasImage() {
 
   return (
     <canvas
+      className="canvas"
       data-test="tainted-canvas"
       style={{ padding: 20 }}
       ref={ref}
