@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 
-function CanvasImage() {
+function CanvasImage({ responsive }) {
   const ref = useRef();
   useEffect(() => {
     const ctx = ref.current.getContext('2d');
@@ -14,11 +14,12 @@ function CanvasImage() {
 
   return (
     <canvas
+      className="canvas"
       data-test="untainted-canvas"
-      style={{ padding: 20 }}
+      style={{ padding: 20, width: responsive ? 'calc(100% - 40px)' : undefined }}
       ref={ref}
-      width="200"
-      height="100"
+      width={responsive ? undefined : '200'}
+      height={responsive ? undefined : '100'}
     />
   );
 }
@@ -36,6 +37,7 @@ function TaintedCanvasImage() {
 
   return (
     <canvas
+      className="canvas"
       data-test="tainted-canvas"
       style={{ padding: 20 }}
       ref={ref}
@@ -60,6 +62,7 @@ export default function IndexPage() {
       <div className="card">
         <h1>I'm a card</h1>
         <img src="/hotel.jpg" />
+        <CanvasImage responsive />
       </div>
       <button className="button">Click me</button>
       <div className="images">
