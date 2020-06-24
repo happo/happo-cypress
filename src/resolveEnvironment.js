@@ -107,9 +107,6 @@ function resolveBeforeSha(env, afterSha) {
     encoding: 'utf-8',
   });
   if (res.status !== 0) {
-    if (/Not a valid object name/.test(res.stderr)) {
-      return undefined;
-    }
     console.error(
       `[HAPPO] Ignored error when resolving base commit: ${res.stderr}`,
     );
