@@ -51,11 +51,12 @@ function testTravisEnv() {
     TRAVIS_REPO_SLUG: 'owner/repo',
     TRAVIS_PULL_REQUEST: 12,
     TRAVIS_PULL_REQUEST_SHA: 'abcdef',
+    TRAVIS_COMMIT_RANGE: 'ttvvb...abcdef',
     TRAVIS_COMMIT: 'xyz',
   };
 
   let result = resolveEnvironment(travisEnv);
-  assert.equal(result.beforeSha, undefined);
+  assert.equal(result.beforeSha, 'ttvvb');
   assert.equal(result.afterSha, 'abcdef');
   assert.equal(result.link, 'http://git.hub/owner/repo/pull/12');
   assert.ok(result.message !== undefined);
@@ -65,6 +66,7 @@ function testTravisEnv() {
     ...travisEnv,
     TRAVIS_PULL_REQUEST_SHA: undefined,
     TRAVIS_PULL_REQUEST: undefined,
+    TRAVIS_COMMIT_RANGE: undefined,
     TRAVIS_COMMIT: '4521c1411c5c0ad19fd72fa31b12363ab54d5eab',
   });
 

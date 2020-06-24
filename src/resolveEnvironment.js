@@ -21,6 +21,7 @@ const envKeys = [
   'TRAVIS_PULL_REQUEST',
   'TRAVIS_PULL_REQUEST_SHA',
   'TRAVIS_REPO_SLUG',
+  'TRAVIS_COMMIT_RANGE',
 ];
 
 function resolveLink(env) {
@@ -83,6 +84,7 @@ function resolveBeforeSha(env, afterSha) {
     HAPPO_PREVIOUS_SHA,
     PREVIOUS_SHA,
     HAPPO_BASE_BRANCH,
+    TRAVIS_COMMIT_RANGE,
 
     // legacy
     BASE_BRANCH,
@@ -100,6 +102,11 @@ function resolveBeforeSha(env, afterSha) {
     // The afterSha has been auto-generated. Don't use a base commit in this
     // scenario
     return undefined;
+  }
+
+  if (TRAVIS_COMMIT_RANGE) {
+    const [first] = TRAVIS_COMMIT_RANGE.split('...');
+    return first;
   }
 
   const baseBranch = HAPPO_BASE_BRANCH || BASE_BRANCH || 'origin/master';
