@@ -1,6 +1,29 @@
 const { spawnSync } = require('child_process');
 const crypto = require('crypto');
 
+const envKeys = [
+  'BASE_BRANCH',
+  'CHANGE_URL',
+  'CIRCLE_PROJECT_REPONAME',
+  'CIRCLE_PROJECT_USERNAME',
+  'CIRCLE_SHA1',
+  'CI_PULL_REQUEST',
+  'CURRENT_SHA',
+  'GITHUB_BASE',
+  'HAPPO_BASE_BRANCH',
+  'HAPPO_CHANGE_URL',
+  'HAPPO_CURRENT_SHA',
+  'HAPPO_DEBUG',
+  'HAPPO_GITHUB_BASE',
+  'HAPPO_PREVIOUS_SHA',
+  'PREVIOUS_SHA',
+  'TRAVIS_COMMIT',
+  'TRAVIS_PULL_REQUEST',
+  'TRAVIS_PULL_REQUEST_SHA',
+  'TRAVIS_REPO_SLUG',
+  'TRAVIS_COMMIT_RANGE',
+];
+
 function resolveLink(env) {
   const {
     CHANGE_URL,
@@ -61,6 +84,7 @@ function resolveBeforeSha(env, afterSha) {
     HAPPO_PREVIOUS_SHA,
     PREVIOUS_SHA,
     HAPPO_BASE_BRANCH,
+    TRAVIS_COMMIT_RANGE,
 
     // legacy
     BASE_BRANCH,
@@ -80,14 +104,16 @@ function resolveBeforeSha(env, afterSha) {
     return undefined;
   }
 
+  if (TRAVIS_COMMIT_RANGE) {
+    const [first] = TRAVIS_COMMIT_RANGE.split('...');
+    return first;
+  }
+
   const baseBranch = HAPPO_BASE_BRANCH || BASE_BRANCH || 'origin/master';
   const res = spawnSync('git', ['merge-base', baseBranch, afterSha], {
     encoding: 'utf-8',
   });
   if (res.status !== 0) {
-    if (/Not a valid object name/.test(res.stderr)) {
-      return undefined;
-    }
     console.error(
       `[HAPPO] Ignored error when resolving base commit: ${res.stderr}`,
     );
@@ -116,13 +142,29 @@ function resolveAfterSha(env) {
   return `dev-${crypto.randomBytes(4).toString('hex')}`;
 }
 
+function getRawEnv(env) {
+  const res = {};
+  for (const key of envKeys) {
+    res[key] = env[key];
+  }
+  return res;
+}
+
+
 module.exports = function resolveEnvironment(env = process.env) {
+  const debugMode = env.HAPPO_DEBUG;
   const afterSha = resolveAfterSha(env);
-  return {
+  const result = {
     link: resolveLink(env),
     message: /^dev-/.test(afterSha) ? undefined : resolveMessage(env),
     beforeSha: resolveBeforeSha(env, afterSha),
     afterSha,
     nonce: env.HAPPO_NONCE,
+    debugMode,
   };
+  if (debugMode) {
+    console.log('[HAPPO] Raw environment', getRawEnv(env));
+    console.log('[HAPPO] Resolved environment', result);
+  }
+  return result;
 };
