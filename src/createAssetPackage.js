@@ -7,7 +7,7 @@ const { Writable } = require('stream');
 
 const makeAbsolute = require('./makeAbsolute');
 
-const { HTTP_PROXY } = process.env;
+const { HTTP_PROXY, HAPPO_DEBUG } = process.env;
 
 const FILE_CREATION_DATE = new Date(
   'Fri March 20 2020 13:44:55 GMT+0100 (CET)',
@@ -74,6 +74,12 @@ module.exports = function createAssetPackage(urls) {
           const fetchOptions = {};
           if (HTTP_PROXY) {
             fetchOptions.agent = new HttpsProxyAgent(HTTP_PROXY);
+          }
+          if (HAPPO_DEBUG) {
+            console.log(
+              `[HAPPO] using the following node-fetch options`,
+              fetchOptions,
+            );
           }
           const fetchRes = await nodeFetch(
             makeAbsolute(url, baseUrl),
