@@ -125,7 +125,15 @@ module.exports = {
       { ...happoConfig, maxTries: 3 },
     );
 
-    const globalCSS = allCssBlocks.map(block => block.content).join('\n');
+    let globalCSS = allCssBlocks.map(block => block.content).join('\n');
+    for (const url of uniqueUrls) {
+      if (/^_external/.test(url.name)) {
+        globalCSS = globalCSS.split(url.url).join(url.name);
+        snapshots.forEach((snapshot) => {
+          snapshot.html = snapshot.html.split(url.url).join(url.name);
+        });
+      }
+    }
     const allRequestIds = [];
     await Promise.all(
       Object.keys(happoConfig.targets).map(async name => {
