@@ -52,51 +52,50 @@ module.exports = function createAssetPackage(urls) {
     });
     archive.pipe(stream);
 
-    const promises = urls
-      .filter(
-        ({ url, baseUrl, base64Url }) =>
-          base64Url || url.startsWith('/') || url.startsWith(baseUrl),
-      )
-      .map(async ({ url, baseUrl, base64Url }) => {
-        const name = normalize(stripQueryParams(url), baseUrl);
-        if (seenUrls.has(name)) {
-          // already processed
-          return;
+    const promises = urls.map(async (item) => {
+      const { url, baseUrl, base64Url } = item;
+      const name = /^https?:/.test(url || '')
+        ? `_external/${encodeURIComponent(url)}`
+        : normalize(stripQueryParams(url), baseUrl);
+      if (seenUrls.has(name)) {
+        // already processed
+        return;
+      }
+      seenUrls.add(name);
+      if (base64Url) {
+        const data = base64Url.split(',')[1];
+        archive.append(Buffer.from(data, 'base64'), {
+          name,
+          date: FILE_CREATION_DATE,
+        });
+      } else {
+        const fetchOptions = {};
+        if (HTTP_PROXY) {
+          fetchOptions.agent = new HttpsProxyAgent(HTTP_PROXY);
         }
-        seenUrls.add(name);
-        if (base64Url) {
-          const data = base64Url.split(',')[1];
-          archive.append(Buffer.from(data, 'base64'), {
-            name,
-            date: FILE_CREATION_DATE,
-          });
-        } else {
-          const fetchOptions = {};
-          if (HTTP_PROXY) {
-            fetchOptions.agent = new HttpsProxyAgent(HTTP_PROXY);
-          }
-          if (HAPPO_DEBUG) {
-            console.log(
-              `[HAPPO] using the following node-fetch options`,
-              fetchOptions,
-            );
-          }
-          const fetchRes = await nodeFetch(
-            makeAbsolute(url, baseUrl),
+        if (HAPPO_DEBUG) {
+          console.log(
+            `[HAPPO] using the following node-fetch options`,
             fetchOptions,
           );
-          if (!fetchRes.ok) {
-            console.log(
-              `[HAPPO] Failed to fetch url ${url} — ${fetchRes.statusText}`,
-            );
-            return;
-          }
-          archive.append(fetchRes.body, {
-            name,
-            date: FILE_CREATION_DATE,
-          });
         }
-      });
+        const fetchRes = await nodeFetch(
+          makeAbsolute(url, baseUrl),
+          fetchOptions,
+        );
+        if (!fetchRes.ok) {
+          console.log(
+            `[HAPPO] Failed to fetch url ${url} — ${fetchRes.statusText}`,
+          );
+          return;
+        }
+        archive.append(fetchRes.body, {
+          name,
+          date: FILE_CREATION_DATE,
+        });
+        item.name = `/${name}`;
+      }
+    });
 
     await Promise.all(promises);
     archive.finalize();
