@@ -171,6 +171,7 @@ async function init(argv) {
   const child = spawn(commandParts[0], commandParts.slice(1), {
     stdio: 'inherit',
     env: { ...process.env, HAPPO_CYPRESS_PORT: serverPort },
+    shell: process.platform == 'win32',
   });
 
   child.on('error', e => {
