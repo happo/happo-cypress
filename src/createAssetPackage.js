@@ -7,7 +7,7 @@ const { Writable } = require('stream');
 
 const makeAbsolute = require('./makeAbsolute');
 
-const { HTTP_PROXY, HAPPO_DEBUG } = process.env;
+const { HTTP_PROXY, HAPPO_DEBUG, HAPPO_DOWNLOAD_ALL } = process.env;
 
 const FILE_CREATION_DATE = new Date(
   'Fri March 20 2020 13:44:55 GMT+0100 (CET)',
@@ -54,7 +54,11 @@ module.exports = function createAssetPackage(urls) {
 
     const promises = urls.map(async item => {
       const { url, baseUrl, base64Url } = item;
-      const name = /^https?:/.test(url || '')
+      const isExternalUrl = /^https?:/.test(url || '');
+      if (!HAPPO_DOWNLOAD_ALL && isExternalUrl) {
+        return;
+      }
+      const name = isExternalUrl
         ? `_external/${crypto.createHash('md5').update(url).digest('hex')}`
         : normalize(stripQueryParams(url), baseUrl);
       if (seenUrls.has(name)) {

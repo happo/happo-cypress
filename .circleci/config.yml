@@ -37,6 +37,13 @@ workflows:
           start: yarn dev
           command-prefix: node bin/happo-cypress.js -- yarn
       - cypress/run:
+          name: cypress-download-all
+          requires:
+            - cypress/install
+          yarn: true
+          start: yarn dev
+          command-prefix: "HAPPO_PROJECT=download-all HAPPO_DOWNLOAD_ALL=true node bin/happo-cypress.js -- yarn"
+      - cypress/run:
           name: cypress-parallel
           requires:
             - cypress/install
