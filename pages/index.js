@@ -78,6 +78,10 @@ export default function IndexPage() {
       <EmptyCanvasImage />
       <div className="card">
         <h1>I'm a card</h1>
+        <i
+          className="fas fa-camera"
+          style={{ marginBottom: 20, fontSize: '40px' }}
+        />
         <img src="/hotel.jpg" />
         <CanvasImage responsive />
       </div>
