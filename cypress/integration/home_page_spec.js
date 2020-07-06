@@ -54,5 +54,9 @@ describe('The Home Page', () => {
       component: 'Canvas',
       variant: 'tainted',
     });
+    cy.get('[data-test="empty-canvas"]').happoScreenshot({
+      component: 'Canvas',
+      variant: 'empty',
+    });
   });
 });
