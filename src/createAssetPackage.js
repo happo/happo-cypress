@@ -52,10 +52,10 @@ module.exports = function createAssetPackage(urls) {
     });
     archive.pipe(stream);
 
-    const promises = urls.map(async (item) => {
+    const promises = urls.map(async item => {
       const { url, baseUrl, base64Url } = item;
       const name = /^https?:/.test(url || '')
-        ? `_external/${encodeURIComponent(url)}`
+        ? `_external/${crypto.createHash('md5').update(url).digest('hex')}`
         : normalize(stripQueryParams(url), baseUrl);
       if (seenUrls.has(name)) {
         // already processed
@@ -79,13 +79,11 @@ module.exports = function createAssetPackage(urls) {
             fetchOptions,
           );
         }
-        const fetchRes = await nodeFetch(
-          makeAbsolute(url, baseUrl),
-          fetchOptions,
-        );
+        const fetchUrl = makeAbsolute(url, baseUrl);
+        const fetchRes = await nodeFetch(fetchUrl, fetchOptions);
         if (!fetchRes.ok) {
           console.log(
-            `[HAPPO] Failed to fetch url ${url} — ${fetchRes.statusText}`,
+            `[HAPPO] Failed to fetch url ${fetchUrl} — ${fetchRes.statusText}`,
           );
           return;
         }
