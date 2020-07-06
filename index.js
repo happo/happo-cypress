@@ -101,8 +101,12 @@ function inlineCanvases(doc, subject) {
       const className = canvas.getAttribute('class');
       const width = canvas.getAttribute('width');
       const height = canvas.getAttribute('height');
-      image.setAttribute('style', style);
-      image.setAttribute('class', className);
+      if (style) {
+        image.setAttribute('style', style);
+      }
+      if (className) {
+        image.setAttribute('class', className);
+      }
       image.setAttribute('width', width);
       image.setAttribute('height', height);
       canvas.replaceWith(image);
