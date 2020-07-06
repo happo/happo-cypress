@@ -3,6 +3,7 @@ const nodeFetch = require('node-fetch');
 const makeRequest = require('happo.io/build/makeRequest').default;
 
 const createAssetPackage = require('./src/createAssetPackage');
+const proxiedFetch = require('./src/fetch');
 const findCSSAssetUrls = require('./src/findCSSAssetUrls');
 const loadHappoConfig = require('./src/loadHappoConfig');
 const makeAbsolute = require('./src/makeAbsolute');
@@ -43,7 +44,7 @@ async function downloadCSSContent(blocks) {
   const promises = blocks.map(async block => {
     if (block.href) {
       const absUrl = makeAbsolute(block.href, block.baseUrl);
-      const res = await nodeFetch(absUrl);
+      const res = await proxiedFetch(absUrl);
       if (!res.ok) {
         console.warn(
           `[HAPPO] Failed to fetch CSS file from ${block.href}. This might mean styles are missing in your Happo screenshots`,
