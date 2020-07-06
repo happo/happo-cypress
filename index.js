@@ -84,9 +84,12 @@ function inlineCanvases(doc, subject) {
   let newSubject = subject;
   const replacements = [];
   for (const canvas of canvases) {
-    const image = doc.createElement('img');
     try {
       const canvasImageBase64 = canvas.toDataURL('image/png');
+      if (canvasImageBase64 === 'data:,') {
+        continue;
+      }
+      const image = doc.createElement('img');
 
       const url = `/_inlined/${crypto
         .createHash('md5')
