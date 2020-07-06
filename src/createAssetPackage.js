@@ -1,13 +1,12 @@
 const crypto = require('crypto');
 const Archiver = require('archiver');
-const nodeFetch = require('node-fetch');
-const HttpsProxyAgent = require('https-proxy-agent');
 
 const { Writable } = require('stream');
 
+const proxiedFetch = require('./fetch');
 const makeAbsolute = require('./makeAbsolute');
 
-const { HTTP_PROXY, HAPPO_DEBUG, HAPPO_DOWNLOAD_ALL } = process.env;
+const { HAPPO_DOWNLOAD_ALL } = process.env;
 
 const FILE_CREATION_DATE = new Date(
   'Fri March 20 2020 13:44:55 GMT+0100 (CET)',
@@ -73,18 +72,8 @@ module.exports = function createAssetPackage(urls) {
           date: FILE_CREATION_DATE,
         });
       } else {
-        const fetchOptions = {};
-        if (HTTP_PROXY) {
-          fetchOptions.agent = new HttpsProxyAgent(HTTP_PROXY);
-        }
-        if (HAPPO_DEBUG) {
-          console.log(
-            `[HAPPO] using the following node-fetch options`,
-            fetchOptions,
-          );
-        }
         const fetchUrl = makeAbsolute(url, baseUrl);
-        const fetchRes = await nodeFetch(fetchUrl, fetchOptions);
+        const fetchRes = await proxiedFetch(fetchUrl);
         if (!fetchRes.ok) {
           console.log(
             `[HAPPO] Failed to fetch url ${fetchUrl} — ${fetchRes.statusText}`,
