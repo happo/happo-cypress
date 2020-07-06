@@ -17,6 +17,10 @@ class MyDocument extends Document {
             rel="stylesheet"
           />
           <link
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.1/css/all.min.css"
+            rel="stylesheet"
+          />
+          <link
             href="https://unpkg.com/reset-css@5.0.1/reset.css"
             rel="stylesheet"
           />

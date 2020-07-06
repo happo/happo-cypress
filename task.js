@@ -1,3 +1,4 @@
+const { URL } = require('url');
 const nodeFetch = require('node-fetch');
 const makeRequest = require('happo.io/build/makeRequest').default;
 
@@ -28,17 +29,31 @@ function getUniqueUrls(urls) {
   return urls;
 }
 
+function makeExternalUrlsAbsolute(text, absUrl) {
+  const assetUrls = findCSSAssetUrls(text);
+  let result = text;
+  for (const url of assetUrls) {
+    const fullUrl = new URL(url, absUrl);
+    result = result.split(url).join(fullUrl.href);
+  }
+  return result;
+}
+
 async function downloadCSSContent(blocks) {
   const promises = blocks.map(async block => {
     if (block.href) {
-      const res = await nodeFetch(makeAbsolute(block.href, block.baseUrl));
+      const absUrl = makeAbsolute(block.href, block.baseUrl);
+      const res = await nodeFetch(absUrl);
       if (!res.ok) {
         console.warn(
           `[HAPPO] Failed to fetch CSS file from ${block.href}. This might mean styles are missing in your Happo screenshots`,
         );
         return;
       }
-      const text = await res.text();
+      let text = await res.text();
+      if (!absUrl.startsWith(block.baseUrl)) {
+        text = makeExternalUrlsAbsolute(text, absUrl);
+      }
       block.content = text;
       delete block.href;
     }
@@ -125,7 +140,15 @@ module.exports = {
       { ...happoConfig, maxTries: 3 },
     );
 
-    const globalCSS = allCssBlocks.map(block => block.content).join('\n');
+    let globalCSS = allCssBlocks.map(block => block.content).join('\n');
+    for (const url of uniqueUrls) {
+      if (/^\/_external\//.test(url.name) && url.name !== url.url) {
+        globalCSS = globalCSS.split(url.url).join(url.name);
+        snapshots.forEach(snapshot => {
+          snapshot.html = snapshot.html.split(url.url).join(url.name);
+        });
+      }
+    }
     const allRequestIds = [];
     await Promise.all(
       Object.keys(happoConfig.targets).map(async name => {

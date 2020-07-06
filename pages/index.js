@@ -16,7 +16,10 @@ function CanvasImage({ responsive }) {
     <canvas
       className="canvas"
       data-test="untainted-canvas"
-      style={{ padding: 20, width: responsive ? 'calc(100% - 40px)' : undefined }}
+      style={{
+        padding: 20,
+        width: responsive ? 'calc(100% - 40px)' : undefined,
+      }}
       ref={ref}
       width={responsive ? undefined : '200'}
       height={responsive ? undefined : '100'}
@@ -47,6 +50,19 @@ function TaintedCanvasImage() {
   );
 }
 
+function EmptyCanvasImage() {
+  // 0x0 canvases will return `data:,` as the base64data
+  return (
+    <div style={{ width: 100, height: 50 }} data-test="empty-canvas">
+      <canvas
+        style={{ width: '100%', height: '100%', background: 'red' }}
+        width="0"
+        height="0"
+      />
+    </div>
+  );
+}
+
 export default function IndexPage() {
   useEffect(() => {
     const style = document.createElement('style');
@@ -59,8 +75,13 @@ export default function IndexPage() {
     <div>
       <CanvasImage />
       <TaintedCanvasImage />
+      <EmptyCanvasImage />
       <div className="card">
         <h1>I'm a card</h1>
+        <i
+          className="fas fa-camera"
+          style={{ marginBottom: 20, fontSize: '40px' }}
+        />
         <img src="/hotel.jpg" />
         <CanvasImage responsive />
       </div>

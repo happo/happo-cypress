@@ -84,9 +84,12 @@ function inlineCanvases(doc, subject) {
   let newSubject = subject;
   const replacements = [];
   for (const canvas of canvases) {
-    const image = doc.createElement('img');
     try {
       const canvasImageBase64 = canvas.toDataURL('image/png');
+      if (canvasImageBase64 === 'data:,') {
+        continue;
+      }
+      const image = doc.createElement('img');
 
       const url = `/_inlined/${crypto
         .createHash('md5')
@@ -98,8 +101,12 @@ function inlineCanvases(doc, subject) {
       const className = canvas.getAttribute('class');
       const width = canvas.getAttribute('width');
       const height = canvas.getAttribute('height');
-      image.setAttribute('style', style);
-      image.setAttribute('class', className);
+      if (style) {
+        image.setAttribute('style', style);
+      }
+      if (className) {
+        image.setAttribute('class', className);
+      }
       image.setAttribute('width', width);
       image.setAttribute('height', height);
       canvas.replaceWith(image);

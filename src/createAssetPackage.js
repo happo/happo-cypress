@@ -7,7 +7,7 @@ const { Writable } = require('stream');
 
 const makeAbsolute = require('./makeAbsolute');
 
-const { HTTP_PROXY, HAPPO_DEBUG } = process.env;
+const { HTTP_PROXY, HAPPO_DEBUG, HAPPO_DOWNLOAD_ALL } = process.env;
 
 const FILE_CREATION_DATE = new Date(
   'Fri March 20 2020 13:44:55 GMT+0100 (CET)',
@@ -52,51 +52,52 @@ module.exports = function createAssetPackage(urls) {
     });
     archive.pipe(stream);
 
-    const promises = urls
-      .filter(
-        ({ url, baseUrl, base64Url }) =>
-          base64Url || url.startsWith('/') || url.startsWith(baseUrl),
-      )
-      .map(async ({ url, baseUrl, base64Url }) => {
-        const name = normalize(stripQueryParams(url), baseUrl);
-        if (seenUrls.has(name)) {
-          // already processed
-          return;
+    const promises = urls.map(async item => {
+      const { url, baseUrl, base64Url } = item;
+      const isExternalUrl = /^https?:/.test(url || '');
+      if (!HAPPO_DOWNLOAD_ALL && isExternalUrl) {
+        return;
+      }
+      const name = isExternalUrl
+        ? `_external/${crypto.createHash('md5').update(url).digest('hex')}`
+        : normalize(stripQueryParams(url), baseUrl);
+      if (seenUrls.has(name)) {
+        // already processed
+        return;
+      }
+      seenUrls.add(name);
+      if (base64Url) {
+        const data = base64Url.split(',')[1];
+        archive.append(Buffer.from(data, 'base64'), {
+          name,
+          date: FILE_CREATION_DATE,
+        });
+      } else {
+        const fetchOptions = {};
+        if (HTTP_PROXY) {
+          fetchOptions.agent = new HttpsProxyAgent(HTTP_PROXY);
         }
-        seenUrls.add(name);
-        if (base64Url) {
-          const data = base64Url.split(',')[1];
-          archive.append(Buffer.from(data, 'base64'), {
-            name,
-            date: FILE_CREATION_DATE,
-          });
-        } else {
-          const fetchOptions = {};
-          if (HTTP_PROXY) {
-            fetchOptions.agent = new HttpsProxyAgent(HTTP_PROXY);
-          }
-          if (HAPPO_DEBUG) {
-            console.log(
-              `[HAPPO] using the following node-fetch options`,
-              fetchOptions,
-            );
-          }
-          const fetchRes = await nodeFetch(
-            makeAbsolute(url, baseUrl),
+        if (HAPPO_DEBUG) {
+          console.log(
+            `[HAPPO] using the following node-fetch options`,
             fetchOptions,
           );
-          if (!fetchRes.ok) {
-            console.log(
-              `[HAPPO] Failed to fetch url ${url} — ${fetchRes.statusText}`,
-            );
-            return;
-          }
-          archive.append(fetchRes.body, {
-            name,
-            date: FILE_CREATION_DATE,
-          });
         }
-      });
+        const fetchUrl = makeAbsolute(url, baseUrl);
+        const fetchRes = await nodeFetch(fetchUrl, fetchOptions);
+        if (!fetchRes.ok) {
+          console.log(
+            `[HAPPO] Failed to fetch url ${fetchUrl} — ${fetchRes.statusText}`,
+          );
+          return;
+        }
+        archive.append(fetchRes.body, {
+          name,
+          date: FILE_CREATION_DATE,
+        });
+        item.name = `/${name}`;
+      }
+    });
 
     await Promise.all(promises);
     archive.finalize();
