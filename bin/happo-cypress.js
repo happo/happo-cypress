@@ -188,7 +188,6 @@ async function init(argv) {
         process.exit(1);
       }
     }
-
     process.exit(code);
   });
 }
