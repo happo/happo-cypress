@@ -9,7 +9,7 @@ const loadHappoConfig = require('./src/loadHappoConfig');
 const makeAbsolute = require('./src/makeAbsolute');
 const resolveEnvironment = require('./src/resolveEnvironment');
 
-const { HAPPO_CYPRESS_PORT } = process.env;
+const { HAPPO_CYPRESS_PORT, HAPPO_DEBUG } = process.env;
 
 let snapshots;
 let allCssBlocks;
@@ -44,6 +44,9 @@ async function downloadCSSContent(blocks) {
   const promises = blocks.map(async block => {
     if (block.href) {
       const absUrl = makeAbsolute(block.href, block.baseUrl);
+      if (HAPPO_DEBUG) {
+        console.log(`[HAPPO] Downloading CSS file from ${absUrl}`);
+      }
       const res = await proxiedFetch(absUrl);
       if (!res.ok) {
         console.warn(
@@ -52,6 +55,11 @@ async function downloadCSSContent(blocks) {
         return;
       }
       let text = await res.text();
+      if (HAPPO_DEBUG) {
+        console.log(
+          `[HAPPO] Done downloading CSS file from ${absUrl}. Got ${text.length} chars back.`,
+        );
+      }
       if (!absUrl.startsWith(block.baseUrl)) {
         text = makeExternalUrlsAbsolute(text, absUrl);
       }
@@ -123,6 +131,9 @@ module.exports = {
     const uniqueUrls = getUniqueUrls(allUrls);
     const { buffer, hash } = await createAssetPackage(uniqueUrls);
 
+    if (HAPPO_DEBUG) {
+      console.log(`[HAPPO] Uploading assets package`);
+    }
     const assetsRes = await makeRequest(
       {
         url: `${happoConfig.endpoint}/api/snap-requests/assets/${hash}`,
@@ -140,6 +151,9 @@ module.exports = {
       },
       { ...happoConfig, maxTries: 3 },
     );
+    if (HAPPO_DEBUG) {
+      console.log('[HAPPO] Done uploading assets package, got', assetsRes);
+    }
 
     let globalCSS = allCssBlocks.map(block => block.content).join('\n');
     for (const url of uniqueUrls) {
@@ -153,6 +167,9 @@ module.exports = {
     const allRequestIds = [];
     await Promise.all(
       Object.keys(happoConfig.targets).map(async name => {
+        if (HAPPO_DEBUG) {
+          console.log(`[HAPPO] Sending snap-request(s) for target=${name}`);
+        }
         const snapshotsForTarget = snapshots.filter(
           ({ targets }) => !targets || targets.includes(name),
         );
@@ -166,6 +183,13 @@ module.exports = {
           apiKey: happoConfig.apiKey,
           apiSecret: happoConfig.apiSecret,
         });
+        if (HAPPO_DEBUG) {
+          console.log(
+            `[HAPPO] Snap-request(s) for target=${name} created with ID(s)=${requestIds.join(
+              ',',
+            )}`,
+          );
+        }
         allRequestIds.push(...requestIds);
       }),
     );
