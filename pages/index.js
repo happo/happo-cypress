@@ -76,6 +76,7 @@ export default function IndexPage() {
       <CanvasImage />
       <TaintedCanvasImage />
       <EmptyCanvasImage />
+      <div style={{ background: 'url(#shadow)' }} />
       <div className="card">
         <h1>I'm a card</h1>
         <i

@@ -27,6 +27,7 @@ function normalize(url, baseUrl) {
   if (url.startsWith('/')) {
     return url.slice(1);
   }
+  return url;
 }
 
 module.exports = function createAssetPackage(urls) {
@@ -68,6 +69,9 @@ module.exports = function createAssetPackage(urls) {
       const name = isExternalUrl
         ? `_external/${crypto.createHash('md5').update(url).digest('hex')}`
         : normalize(stripQueryParams(url), baseUrl);
+      if (name.startsWith('#')) {
+        return;
+      }
       if (seenUrls.has(name)) {
         // already processed
         return;
