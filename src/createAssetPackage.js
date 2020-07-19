@@ -27,6 +27,9 @@ function normalize(url, baseUrl) {
   if (url.startsWith('/')) {
     return url.slice(1);
   }
+  if (url.startsWith('../')) {
+    return url.slice(3);
+  }
   return url;
 }
 

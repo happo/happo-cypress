@@ -64,6 +64,7 @@ async function downloadCSSContent(blocks) {
         text = makeExternalUrlsAbsolute(text, absUrl);
       }
       block.content = text;
+      block.assetsBaseUrl = absUrl.replace(/\/[^/]*$/, '/');
       delete block.href;
     }
   });
@@ -124,7 +125,7 @@ module.exports = {
     const allUrls = [...snapshotAssetUrls];
     allCssBlocks.forEach(block => {
       findCSSAssetUrls(block.content).forEach(url =>
-        allUrls.push({ url, baseUrl: block.baseUrl }),
+        allUrls.push({ url, baseUrl: block.assetsBaseUrl || block.baseUrl }),
       );
     });
 
