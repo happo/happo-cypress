@@ -1,0 +1,8 @@
+@font-face {
+  font-family: 'CustomFont';
+  src: url('../Lato-Bold.woff2') format('woff2');
+}
+
+body, button {
+  font-family: 'CustomFont';
+}
