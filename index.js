@@ -1,4 +1,4 @@
-const crypto = require('crypto');
+const md5 = require('crypto-js/md5');
 
 const parseSrcset = require('parse-srcset');
 
@@ -36,7 +36,7 @@ function extractCSSBlocks({ doc }) {
         .join('\n');
 
       // Create a hash so that we can dedupe equal styles
-      const key = crypto.createHash('md5').update(content).digest('hex');
+      const key = md5(content);
       blocks.push({ content, key, baseUrl });
     }
   });
@@ -91,10 +91,7 @@ function inlineCanvases(doc, subject) {
       }
       const image = doc.createElement('img');
 
-      const url = `/_inlined/${crypto
-        .createHash('md5')
-        .update(canvasImageBase64)
-        .digest('hex')}.png`;
+      const url = `/_inlined/${md5(canvasImageBase64)}.png`;
       image.src = url;
       image._base64Url = canvasImageBase64;
       const style = canvas.getAttribute('style');
