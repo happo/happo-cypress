@@ -21,6 +21,9 @@ function extractCSSBlocks({ doc }) {
   );
   const baseUrl = doc.location.origin;
   styleElements.forEach(element => {
+    if (element.__happoAlreadyProcessed) {
+      return;
+    }
     if (element.tagName === 'LINK') {
       // <link href>
       const href = element.getAttribute('href');
@@ -39,6 +42,7 @@ function extractCSSBlocks({ doc }) {
       const key = md5(content);
       blocks.push({ content, key, baseUrl });
     }
+    element.__happoAlreadyProcessed = true;
   });
   return blocks;
 }
