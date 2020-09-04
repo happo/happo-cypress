@@ -1,7 +1,7 @@
 version: 2.1
 orbs:
   node: circleci/node@1.1.6
-  cypress: cypress-io/cypress@1.23.0
+  cypress: cypress-io/cypress@1.26.0
 jobs:
   build-and-test:
     executor:
@@ -12,15 +12,7 @@ jobs:
           steps:
             - run: yarn install
             - run: yarn lint
-  finalize-happo:
-    executor:
-      name: node/default
-    steps:
-      - checkout
-      - node/with-cache:
-          steps:
-            - run: yarn install
-            - run: "HAPPO_PROJECT=parallel HAPPO_NONCE=${CIRCLE_WORKFLOW_ID} node bin/happo-cypress.js finalize"
+
 workflows:
   build-and-test:
     jobs:
@@ -29,6 +21,7 @@ workflows:
     jobs:
       - cypress/install:
           yarn: true
+
       - cypress/run:
           name: cypress-serial
           requires:
@@ -36,13 +29,23 @@ workflows:
           yarn: true
           start: yarn dev
           command-prefix: node bin/happo-cypress.js -- yarn
+
       - cypress/run:
           name: cypress-download-all
           requires:
             - cypress/install
           yarn: true
           start: yarn dev
-          command-prefix: "HAPPO_PROJECT=download-all HAPPO_DOWNLOAD_ALL=true node bin/happo-cypress.js -- yarn"
+          command-prefix: 'HAPPO_PROJECT=download-all HAPPO_DOWNLOAD_ALL=true node bin/happo-cypress.js -- yarn'
+
+      - cypress/run:
+          name: cypress-allow-failures
+          requires:
+            - cypress/install
+          yarn: true
+          start: yarn dev
+          command-prefix: 'CYPRESS_INTRODUCE_FAILING_ASSERTION=true HAPPO_PROJECT=allow-failures node bin/happo-cypress.js --allow-failures -- yarn'
+
       - cypress/run:
           name: cypress-parallel
           requires:
@@ -52,7 +55,20 @@ workflows:
           parallel: true
           parallelism: 2
           record: true
-          command-prefix: "HAPPO_PROJECT=parallel HAPPO_NONCE=${CIRCLE_WORKFLOW_ID} node bin/happo-cypress.js -- yarn"
-      - finalize-happo:
+          command-prefix: 'HAPPO_PROJECT=parallel HAPPO_NONCE=${CIRCLE_WORKFLOW_ID} node bin/happo-cypress.js -- yarn'
+          post-steps:
+            - run: 'HAPPO_PROJECT=parallel HAPPO_NONCE=${CIRCLE_WORKFLOW_ID} node bin/happo-cypress.js finalize'
+
+      - cypress/run:
+          name: cypress-parallel-allow-failures
           requires:
-            - cypress-parallel
+            - cypress/install
+          yarn: true
+          start: yarn dev
+          parallel: true
+          parallelism: 2
+          record: true
+          ci-build-id: 'parallel-allow-failures-${CIRCLE_SHA1}'
+          command-prefix: 'CYPRESS_INTRODUCE_FAILING_ASSERTION=true HAPPO_PROJECT=parallel-allow-failures HAPPO_NONCE=B_${CIRCLE_WORKFLOW_ID} node bin/happo-cypress.js --allow-failures -- yarn'
+          post-steps:
+            - run: 'HAPPO_PROJECT=parallel-allow-failures HAPPO_NONCE=B_${CIRCLE_WORKFLOW_ID} node bin/happo-cypress.js finalize'

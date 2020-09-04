@@ -29,6 +29,10 @@ function parsePort(argv) {
   return parseInt(port, 10);
 }
 
+function parseAllowFailures(argv) {
+  return argv.indexOf('--allow-failures') > -1;
+}
+
 function requestHandler(req, res) {
   const bodyParts = [];
   req.on('data', chunk => {
@@ -179,8 +183,9 @@ async function init(argv) {
     process.exit(1);
   });
 
+  const allowFailures = parseAllowFailures(argv.slice(0, dashdashIndex));
   child.on('close', async code => {
-    if (code === 0) {
+    if (code === 0 || allowFailures) {
       try {
         await finalizeHappoReport();
       } catch (e) {
