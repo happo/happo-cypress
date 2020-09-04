@@ -52,7 +52,7 @@ workflows:
           parallel: true
           parallelism: 2
           record: true
-          command-prefix: "HAPPO_PROJECT=parallel HAPPO_NONCE=${CIRCLE_WORKFLOW_ID} node bin/happo-cypress.js -- yarn"
+          command-prefix: "HAPPO_PROJECT=parallel HAPPO_NONCE=${CIRCLE_WORKFLOW_ID} yarn happo-cypress -- -- yarn"
       - finalize-happo:
           requires:
             - cypress-parallel

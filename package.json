@@ -13,7 +13,8 @@
     "dev": "next --port 7654",
     "build": "next build",
     "lint": "eslint .",
-    "start": "next start"
+    "start": "next start",
+    "happo-cypress": "node ./bin/happo-cypress.js"
   },
   "devDependencies": {
     "cypress": "^5.0.0",
