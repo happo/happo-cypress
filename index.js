@@ -20,8 +20,10 @@ function extractCSSBlocks({ doc }) {
     'style,link[rel="stylesheet"][href]',
   );
   const baseUrl = doc.location.origin;
+  const happoConfig = Cypress.config('happo');
+  const skipAlreadyProcessed = happoConfig && happoConfig.skipAlreadyProcessed;
   styleElements.forEach(element => {
-    if (element.__happoAlreadyProcessed) {
+    if (skipAlreadyProcessed && element.__happoAlreadyProcessed) {
       return;
     }
     if (element.tagName === 'LINK') {
