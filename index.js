@@ -41,7 +41,7 @@ function extractCSSBlocks({ doc }) {
         .join('\n');
 
       // Create a hash so that we can dedupe equal styles
-      const key = md5(content);
+      const key = md5(content).toString();
       blocks.push({ content, key, baseUrl });
     }
     element.__happoAlreadyProcessed = true;
@@ -97,7 +97,7 @@ function inlineCanvases(doc, subject) {
       }
       const image = doc.createElement('img');
 
-      const url = `/_inlined/${md5(canvasImageBase64)}.png`;
+      const url = `/_inlined/${md5(canvasImageBase64).toString()}.png`;
       image.src = url;
       image._base64Url = canvasImageBase64;
       const style = canvas.getAttribute('style');
