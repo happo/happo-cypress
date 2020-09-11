@@ -38,10 +38,10 @@ module.exports = function createAssetPackage(urls) {
     console.log(`[HAPPO] Creating asset package from urls`, urls);
   }
   // eslint-disable-next-line no-async-promise-executor
-  return new Promise(async resolve => {
+  return new Promise(async (resolve, reject) => {
     const seenUrls = new Set();
     const archive = new Archiver('zip');
-    archive.on('error', e => console.error(e));
+    archive.on('error', e => reject(e));
 
     // Create an in-memory stream
     const stream = new Writable();
@@ -72,7 +72,7 @@ module.exports = function createAssetPackage(urls) {
       const name = isExternalUrl
         ? `_external/${crypto.createHash('md5').update(url).digest('hex')}`
         : normalize(stripQueryParams(url), baseUrl);
-      if (name.startsWith('#')) {
+      if (name.startsWith('#') || name === '') {
         return;
       }
       if (seenUrls.has(name)) {
