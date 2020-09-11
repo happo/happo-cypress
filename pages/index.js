@@ -111,6 +111,11 @@ export default function IndexPage() {
             paddingTop: '33%',
           }}
         />
+        <div
+          style={{
+            backgroundImage: 'url()',
+          }}
+        />
         <picture>
           <source
             srcSet="/storyhotel-breakfast.jpg"
