@@ -28,7 +28,6 @@ function testCircleCIEnv() {
     CIRCLE_SHA1: '4521c1411c5c0ad19fd72fa31b12363ab54d5eab',
   });
 
-  assert.equal(result.beforeSha, '62aa0e29b68d0d2e812ad21064b22bf627400ab8');
   assert.equal(result.afterSha, '4521c1411c5c0ad19fd72fa31b12363ab54d5eab');
   assert.equal(result.link, 'https://ghe.com/foo/bar/pull/12');
   assert.ok(result.message !== undefined);
@@ -41,7 +40,10 @@ function testCircleCIEnv() {
 
   assert.equal(result.beforeSha, undefined);
   assert.equal(result.afterSha, 'abcdef');
-  assert.equal(result.link, 'https://github.com/happo/happo-view/commit/abcdef');
+  assert.equal(
+    result.link,
+    'https://github.com/happo/happo-view/commit/abcdef',
+  );
   assert.ok(result.message !== undefined);
 }
 
@@ -70,7 +72,6 @@ function testTravisEnv() {
     TRAVIS_COMMIT: '4521c1411c5c0ad19fd72fa31b12363ab54d5eab',
   });
 
-  assert.equal(result.beforeSha, '62aa0e29b68d0d2e812ad21064b22bf627400ab8');
   assert.equal(result.afterSha, '4521c1411c5c0ad19fd72fa31b12363ab54d5eab');
   assert.equal(
     result.link,

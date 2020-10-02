@@ -12,6 +12,7 @@ jobs:
           steps:
             - run: yarn install
             - run: yarn lint
+            - run: ./run-tests.sh
 
 workflows:
   build-and-test:

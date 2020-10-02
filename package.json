@@ -28,6 +28,7 @@
     "crypto-js": "^4.0.0",
     "https-proxy-agent": "^5.0.0",
     "node-fetch": "^2.6.0",
-    "parse-srcset": "^1.0.2"
+    "parse-srcset": "^1.0.2",
+    "string.prototype.replaceall": "^1.0.3"
   }
 }
