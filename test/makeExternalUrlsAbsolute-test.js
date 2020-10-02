@@ -2,7 +2,7 @@ const assert = require('assert');
 
 const makeExternalUrlsAbsolute = require('../src/makeExternalUrlsAbsolute');
 
-const baseUrl = 'https://base.url';
+const resourceUrl = 'https://base.url/styles/styles.min.css';
 
 function runTest() {
   // updates urls
@@ -20,8 +20,12 @@ function runTest() {
     .ignore {
       background: url(data:image/png;base64,asdf);
     }
+    .relative {
+      background: url(../one.png);
+      background-image: url(two.png);
+    }
   `.trim(),
-      baseUrl,
+      resourceUrl,
     ),
     `
     .foo {
@@ -35,10 +39,14 @@ function runTest() {
     .ignore {
       background: url(data:image/png;base64,asdf);
     }
+    .relative {
+      background: url(https://base.url/one.png);
+      background-image: url(https://base.url/styles/two.png);
+    }
   `.trim(),
   );
   // can deal with empty input
-  assert.equal(makeExternalUrlsAbsolute('', baseUrl), '');
+  assert.equal(makeExternalUrlsAbsolute('', resourceUrl), '');
 }
 
 runTest();
