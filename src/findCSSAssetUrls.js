@@ -1,11 +1,11 @@
-const URL_PATTERN = /(?:url\(['"]?)(.*?)(?:['"]?)\)/g;
+const URL_PATTERN = /(url\(['"]?)(.*?)(['"]?\))/g;
 
-module.exports = function findCSSAssetUrls(string) {
+function findCSSAssetUrls(string) {
   const result = [];
   let match;
   // eslint-disable-next-line no-cond-assign
   while ((match = URL_PATTERN.exec(string))) {
-    const url = match[1];
+    const url = match[2];
     if (!url.startsWith('data:')) {
       result.push(url);
     }
@@ -13,3 +13,5 @@ module.exports = function findCSSAssetUrls(string) {
   return result;
 }
 
+findCSSAssetUrls.URL_PATTERN = URL_PATTERN;
+module.exports = findCSSAssetUrls;

@@ -1,13 +1,12 @@
-const { URL } = require('url');
+const replaceAll = require('string.prototype.replaceall');
 
 const findCSSAssetUrls = require('./findCSSAssetUrls');
 
-module.exports = function makeExternalUrlsAbsolute(text, absUrl) {
-  const assetUrls = findCSSAssetUrls(text);
-  let result = text;
-  for (const url of assetUrls) {
-    const fullUrl = new URL(url, absUrl);
-    result = result.split(url).join(fullUrl.href);
-  }
-  return result;
+module.exports = function makeExternalUrlsAbsolute(text, baseUrl) {
+  return replaceAll(text, findCSSAssetUrls.URL_PATTERN, (full, pre, url, post) => {
+    if (url.startsWith('data:')) {
+      return full;
+    }
+    return `${pre}${baseUrl}${url}${post}`;
+  });
 };
