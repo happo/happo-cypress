@@ -1,4 +1,3 @@
-const { URL } = require('url');
 const nodeFetch = require('node-fetch');
 const makeRequest = require('happo.io/build/makeRequest').default;
 
@@ -7,6 +6,7 @@ const proxiedFetch = require('./src/fetch');
 const findCSSAssetUrls = require('./src/findCSSAssetUrls');
 const loadHappoConfig = require('./src/loadHappoConfig');
 const makeAbsolute = require('./src/makeAbsolute');
+const makeExternalUrlsAbsolute = require('./src/makeExternalUrlsAbsolute');
 const resolveEnvironment = require('./src/resolveEnvironment');
 
 const { HAPPO_CYPRESS_PORT, HAPPO_DEBUG } = process.env;
@@ -28,16 +28,6 @@ function getUniqueUrls(urls) {
     }
   });
   return urls;
-}
-
-function makeExternalUrlsAbsolute(text, absUrl) {
-  const assetUrls = findCSSAssetUrls(text);
-  let result = text;
-  for (const url of assetUrls) {
-    const fullUrl = new URL(url, absUrl);
-    result = result.split(url).join(fullUrl.href);
-  }
-  return result;
 }
 
 async function downloadCSSContent(blocks) {
