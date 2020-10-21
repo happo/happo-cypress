@@ -214,6 +214,10 @@ module.exports = {
         { ...happoConfig, maxTries: 3 },
       );
       console.log(`[HAPPO] ${reportResult.url}`);
+
+      // Reset the component variants so that we can run the test again while
+      // cypress is still open.
+      knownComponentVariants = {};
       return null;
     }
     return null;
