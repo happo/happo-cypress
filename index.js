@@ -180,6 +180,9 @@ Cypress.Commands.add(
         variant,
         targets: options.targets,
       });
+      cy.task('happoRegisterCSSBlocks', {
+        cssBlocks,
+      });
       if (transformCleanup) {
         transformCleanup();
       }

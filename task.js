@@ -76,7 +76,6 @@ module.exports = {
   happoRegisterSnapshot({
     html,
     assetUrls,
-    cssBlocks,
     component,
     variant: rawVariant,
     targets,
@@ -87,6 +86,13 @@ module.exports = {
     const variant = dedupeVariant(component, rawVariant);
     snapshotAssetUrls.push(...assetUrls);
     snapshots.push({ html, component, variant, targets });
+    return null;
+  },
+
+  happoRegisterCSSBlocks({ cssBlocks }) {
+    if (!happoConfig) {
+      return null;
+    }
     cssBlocks.forEach(block => {
       if (allCssBlocks.some(b => b.key === block.key)) {
         return;
