@@ -174,7 +174,6 @@ Cypress.Commands.add(
       const cssBlocks = extractCSSBlocks({ doc });
       cy.task('happoRegisterSnapshot', {
         html,
-        cssBlocks,
         assetUrls,
         component,
         variant,
