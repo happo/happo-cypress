@@ -172,14 +172,21 @@ Cypress.Commands.add(
       const html = subject.outerHTML;
       const assetUrls = getSubjectAssetUrls(subject, doc);
       const cssBlocks = extractCSSBlocks({ doc });
-      cy.task('happoRegisterSnapshot', {
-        html,
-        cssBlocks,
-        assetUrls,
-        component,
-        variant,
-        targets: options.targets,
-      });
+
+      // Even though cy.task can handle an object argument here, we serialize
+      // the object ourselves to avoid running into performance issues with
+      // large payloads. See https://github.com/cypress-io/code-coverage/issues/76
+      cy.task(
+        'happoRegisterSnapshot',
+        JSON.stringify({
+          html,
+          cssBlocks,
+          assetUrls,
+          component,
+          variant,
+          targets: options.targets,
+        }),
+      );
       if (transformCleanup) {
         transformCleanup();
       }

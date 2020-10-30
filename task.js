@@ -73,14 +73,19 @@ function dedupeVariant(component, variant) {
 }
 
 module.exports = {
-  happoRegisterSnapshot({
-    html,
-    assetUrls,
-    cssBlocks,
-    component,
-    variant: rawVariant,
-    targets,
-  }) {
+  // Even though task automatically serialize and deserialize arguments, we
+  // serialize the object ourselves to avoid running into performance issues
+  // with large payloads. See
+  // https://github.com/cypress-io/code-coverage/issues/76
+  happoRegisterSnapshot(jsonPayload) {
+    const {
+      html,
+      assetUrls,
+      cssBlocks,
+      component,
+      variant: rawVariant,
+      targets,
+    } = JSON.parse(jsonPayload);
     if (!happoConfig) {
       return null;
     }
