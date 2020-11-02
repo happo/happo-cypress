@@ -1,4 +1,8 @@
+const fs = require('fs');
+
 const nodeFetch = require('node-fetch');
+const mkdirp = require('mkdirp');
+
 const makeRequest = require('happo.io/build/makeRequest').default;
 
 const createAssetPackage = require('./src/createAssetPackage');
@@ -93,6 +97,22 @@ module.exports = {
       }
       allCssBlocks.push(block);
     });
+    return null;
+  },
+
+  async happoRegisterBase64Image({ base64Url, src }) {
+    const data = base64Url.replace(/^data:image\/png;base64,/, '');
+    const buffer = Buffer.from(data, 'base64');
+    await mkdirp('.happo-tmp/_inlined');
+    await new Promise((resolve, reject) =>
+      fs.writeFile(src.slice(1), buffer, { encoding: null }, e => {
+        if (e) {
+          reject(e);
+        } else {
+          resolve();
+        }
+      }),
+    );
     return null;
   },
 

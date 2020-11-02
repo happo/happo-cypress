@@ -27,6 +27,7 @@
     "archiver": "^3.1.1",
     "crypto-js": "^4.0.0",
     "https-proxy-agent": "^5.0.0",
+    "mkdirp": "^1.0.4",
     "node-fetch": "^2.6.0",
     "parse-srcset": "^1.0.2",
     "string.prototype.replaceall": "^1.0.3"
