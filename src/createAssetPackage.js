@@ -1,6 +1,6 @@
 const crypto = require('crypto');
-const Archiver = require('archiver');
 
+const Archiver = require('archiver');
 const { Writable } = require('stream');
 
 const proxiedFetch = require('./fetch');
@@ -64,7 +64,7 @@ module.exports = function createAssetPackage(urls) {
     archive.pipe(stream);
 
     const promises = urls.map(async item => {
-      const { url, baseUrl, base64Url } = item;
+      const { url, baseUrl } = item;
       const isExternalUrl = /^https?:/.test(url || '');
       if (!HAPPO_DOWNLOAD_ALL && isExternalUrl) {
         return;
@@ -80,9 +80,13 @@ module.exports = function createAssetPackage(urls) {
         return;
       }
       seenUrls.add(name);
-      if (base64Url) {
-        const data = base64Url.split(',')[1];
-        archive.append(Buffer.from(data, 'base64'), {
+      if (/\.happo-tmp\/_inlined/.test(name)) {
+        if (HAPPO_DEBUG) {
+          console.log(
+            `[HAPPO] Adding inlined asset ${name}`,
+          );
+        }
+        archive.file(name, {
           name,
           date: FILE_CREATION_DATE,
         });

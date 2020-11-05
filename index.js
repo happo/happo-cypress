@@ -59,7 +59,7 @@ function getSubjectAssetUrls(subject, doc) {
     const style = element.getAttribute('style');
     const base64Url = element._base64Url;
     if (base64Url) {
-      allUrls.push({ url: src, baseUrl, base64Url });
+      cy.task('happoRegisterBase64Image', { base64Url, src });
     }
     if (src) {
       allUrls.push({ url: src, baseUrl });
@@ -91,7 +91,7 @@ function inlineCanvases(doc, subject) {
       }
       const image = doc.createElement('img');
 
-      const url = `/_inlined/${md5(canvasImageBase64).toString()}.png`;
+      const url = `/.happo-tmp/_inlined/${md5(canvasImageBase64).toString()}.png`;
       image.src = url;
       image._base64Url = canvasImageBase64;
       const style = canvas.getAttribute('style');
