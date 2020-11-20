@@ -20,7 +20,7 @@ let config = {
 
 module.exports = {
   configure: userConfig => {
-    config = { ...config, ...userConfig };
+    config = { ...config, ...(userConfig || {}) };
   },
 };
 
