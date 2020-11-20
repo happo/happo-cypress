@@ -14,6 +14,16 @@ after(() => {
 
 const COMMENT_PATTERN = /^\/\*.+\*\/$/;
 
+let config = {
+  responsiveInlinedCanvases: false,
+};
+
+module.exports = {
+  configure: userConfig => {
+    config = { ...config, ...(userConfig || {}) };
+  },
+};
+
 function extractCSSBlocks({ doc }) {
   const blocks = [];
   const styleElements = doc.querySelectorAll(
@@ -74,12 +84,17 @@ function getSubjectAssetUrls(subject, doc) {
   return allUrls;
 }
 
-function inlineCanvases(doc, subject) {
+function inlineCanvases(doc, subject, options) {
   const canvases = [];
   if (subject.tagName === 'CANVAS') {
     canvases.push(subject);
   }
   canvases.push(...Array.from(subject.querySelectorAll('canvas')));
+
+  const responsive =
+    typeof options.responsiveInlinedCanvases === 'boolean'
+      ? options.responsiveInlinedCanvases
+      : config.responsiveInlinedCanvases;
 
   let newSubject = subject;
   const replacements = [];
@@ -91,21 +106,28 @@ function inlineCanvases(doc, subject) {
       }
       const image = doc.createElement('img');
 
-      const url = `/.happo-tmp/_inlined/${md5(canvasImageBase64).toString()}.png`;
+      const url = `/.happo-tmp/_inlined/${md5(
+        canvasImageBase64,
+      ).toString()}.png`;
       image.src = url;
       image._base64Url = canvasImageBase64;
       const style = canvas.getAttribute('style');
-      const className = canvas.getAttribute('class');
-      const width = canvas.getAttribute('width');
-      const height = canvas.getAttribute('height');
       if (style) {
         image.setAttribute('style', style);
       }
+      const className = canvas.getAttribute('class');
       if (className) {
         image.setAttribute('class', className);
       }
-      image.setAttribute('width', width);
-      image.setAttribute('height', height);
+      if (responsive) {
+        image.style.width = '100%';
+        image.style.height = 'auto';
+      } else {
+        const width = canvas.getAttribute('width');
+        const height = canvas.getAttribute('height');
+        image.setAttribute('width', width);
+        image.setAttribute('height', height);
+      }
       canvas.replaceWith(image);
       if (canvas === subject) {
         // We're inlining the subject (the `cy.get('canvas')` element). Make sure
@@ -159,6 +181,7 @@ Cypress.Commands.add(
       const { subject, cleanup: canvasCleanup } = inlineCanvases(
         doc,
         originalSubject[0],
+        options,
       );
 
       const transformCleanup = options.transformDOM
