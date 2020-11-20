@@ -50,6 +50,11 @@ describe('The Home Page', () => {
       component: 'Canvas',
       variant: 'untainted',
     });
+    cy.get('.responsive-canvas-wrapper').happoScreenshot({
+      component: 'Canvas',
+      variant: 'wrapped, responsive',
+      responsiveInlinedCanvases: true,
+    });
     cy.get('[data-test="tainted-canvas"]').happoScreenshot({
       component: 'Canvas',
       variant: 'tainted',

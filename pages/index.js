@@ -85,6 +85,9 @@ export default function IndexPage() {
         />
         <img src="/hotel.jpg" />
         <CanvasImage responsive />
+        <div className="responsive-canvas-wrapper" style={{ width: 400 }}>
+          <CanvasImage />
+        </div>
       </div>
       <button className="button">Click me</button>
       <div className="images">

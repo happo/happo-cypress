@@ -25,5 +25,7 @@
 // Cypress.Commands.overwrite("visit", (originalFn, url, options) => { ... })
 
 // Add happo command:
-import '../../';
+import { configure } from '../../';
+
+configure({ responsiveInlinedCanvases: false });
 
