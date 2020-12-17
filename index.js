@@ -81,7 +81,7 @@ function getSubjectAssetUrls(subject, doc) {
       allUrls.push(...findCSSAssetUrls(style).map(url => ({ url, baseUrl })));
     }
   });
-  return allUrls;
+  return allUrls.filter(({ url }) => !url.startsWith('data:'));
 }
 
 function inlineCanvases(doc, subject, options) {

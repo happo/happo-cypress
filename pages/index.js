@@ -79,6 +79,11 @@ export default function IndexPage() {
       <div style={{ background: 'url(#shadow)' }} />
       <div className="card">
         <h1>I'm a card</h1>
+        <img
+          className="reddot"
+          src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="
+          alt="Red dot"
+        />
         <i
           className="fas fa-camera"
           style={{ marginBottom: 20, fontSize: '40px' }}
@@ -146,6 +151,10 @@ export default function IndexPage() {
         }
         img {
           width: 100%;
+        }
+        img.reddot {
+          display: block;
+          width: auto;
         }
         button {
           background-color: #333;
