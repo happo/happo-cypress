@@ -73,6 +73,14 @@ export default function IndexPage() {
 
   return (
     <div>
+      <div className="scrollcontainer">
+        <div className="scrollinner">
+          <div style={{ backgroundColor: 'red', height: 100 }} />
+          <div style={{ backgroundColor: 'white', height: 100 }} />
+          <div style={{ backgroundColor: 'blue', height: 100 }} />
+          <div style={{ backgroundColor: 'yellow', height: 100 }} />
+        </div>
+      </div>
       <CanvasImage />
       <TaintedCanvasImage />
       <EmptyCanvasImage />
@@ -148,6 +156,16 @@ export default function IndexPage() {
           font-size: 30px;
           margin-bottom: 10px;
           font-family: 'Lobster';
+        }
+        .scrollcontainer {
+          display: block;
+          width: 100px;
+          height: 100px;
+          overflow: auto;
+        }
+        .scrollinner {
+          display: grid;
+          grid-template-columns: 100px 100px;
         }
         img {
           width: 100%;

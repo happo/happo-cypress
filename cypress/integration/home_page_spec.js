@@ -12,7 +12,7 @@ describe('The Home Page', () => {
           const div = doc.createElement('div');
           div.innerHTML = 'Hello world!';
           return div;
-        }
+        },
       },
     });
     cy.get('body').happoScreenshot({
@@ -24,10 +24,14 @@ describe('The Home Page', () => {
           const div = doc.createElement('div');
           div.innerHTML = `Hello ${element.src}`;
           return div;
-        }
+        },
       },
     });
     cy.get('.card').happoScreenshot({ component: 'Card' });
+
+    cy.get('.scrollcontainer')
+      .scrollTo('center')
+      .happoScreenshot({ component: 'Scrollcontainer', variant: 'center' });
 
     cy.visit('/');
     cy.wait(100);

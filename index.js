@@ -171,6 +171,18 @@ function transformDOM({ doc, selector, transform, subject }) {
   };
 }
 
+function registerScrollPositions(doc) {
+  const elements = doc.body.querySelectorAll('*');
+  for (const node of elements) {
+    if (node.scrollTop !== 0 || node.scrollLeft !== 0) {
+      node.setAttribute(
+        'data-happo-scrollposition',
+        `${node.scrollTop},${node.scrollLeft}`,
+      );
+    }
+  }
+}
+
 Cypress.Commands.add(
   'happoScreenshot',
   { prevSubject: true },
@@ -183,6 +195,7 @@ Cypress.Commands.add(
         originalSubject[0],
         options,
       );
+      registerScrollPositions(doc);
 
       const transformCleanup = options.transformDOM
         ? transformDOM({
