@@ -26,6 +26,7 @@ class MyDocument extends Document {
           />
           <link href="/global.css" rel="stylesheet" />
           <link href="/fonts/fonts.css" rel="stylesheet" />
+          <link href="/subfolder/styles.css" rel="stylesheet" />
         </Head>
         <body>
           <Main />

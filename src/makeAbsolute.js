@@ -5,7 +5,7 @@ module.exports = function makeAbsolute(url, baseUrl) {
     return `${baseUrl.split(':')[0]}:${url}`;
   }
   if (url.startsWith('/')) {
-    return `${baseUrl}${url}`;
+    return `${new URL(baseUrl).origin}${url}`;
   }
   if (url.startsWith('.')) {
     return new URL(`${baseUrl}${url}`).href;

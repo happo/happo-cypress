@@ -128,6 +128,12 @@ export default function IndexPage() {
           }}
         />
         <div
+          className="image background-from-subfolder"
+          style={{
+            paddingTop: '33%',
+          }}
+        />
+        <div
           style={{
             backgroundImage: 'url()',
           }}
