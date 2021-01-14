@@ -13,7 +13,7 @@ const makeAbsolute = require('./src/makeAbsolute');
 const makeExternalUrlsAbsolute = require('./src/makeExternalUrlsAbsolute');
 const resolveEnvironment = require('./src/resolveEnvironment');
 
-const { HAPPO_CYPRESS_PORT, HAPPO_DEBUG } = process.env;
+const { HAPPO_CYPRESS_PORT, HAPPO_DEBUG, HAPPO_ENABLED } = process.env;
 
 let snapshots;
 let allCssBlocks;
@@ -117,10 +117,22 @@ module.exports = {
   },
 
   async happoInit() {
-    happoConfig = await loadHappoConfig();
     snapshots = [];
     allCssBlocks = [];
     snapshotAssetUrls = [];
+    if (!(HAPPO_CYPRESS_PORT || HAPPO_ENABLED)) {
+      console.log(`
+[HAPPO] Happo is disabled. Here's how to enable it:
+  - Use the \`happo-cypress\` wrapper when running \`cypress run\`.
+  - Set \`HAPPO_ENABLED=true\` when running \`cypress open\`.
+
+Docs:
+  https://docs.happo.io/docs/cypress#usage-with-cypress-run
+  https://docs.happo.io/docs/cypress#usage-with-cypress-open
+      `.trim());
+      return null;
+    }
+    happoConfig = await loadHappoConfig();
     return null;
   },
 
