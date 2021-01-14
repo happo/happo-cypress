@@ -82,9 +82,7 @@ module.exports = function createAssetPackage(urls) {
       seenUrls.add(name);
       if (/\.happo-tmp\/_inlined/.test(name)) {
         if (HAPPO_DEBUG) {
-          console.log(
-            `[HAPPO] Adding inlined asset ${name}`,
-          );
+          console.log(`[HAPPO] Adding inlined asset ${name}`);
         }
         archive.file(name, {
           name,
@@ -97,18 +95,23 @@ module.exports = function createAssetPackage(urls) {
             `[HAPPO] Fetching asset from ${fetchUrl} — storing as ${name}`,
           );
         }
-        const fetchRes = await proxiedFetch(fetchUrl);
-        if (!fetchRes.ok) {
-          console.log(
-            `[HAPPO] Failed to fetch url ${fetchUrl} — ${fetchRes.statusText}`,
-          );
-          return;
+        try {
+          const fetchRes = await proxiedFetch(fetchUrl);
+          if (!fetchRes.ok) {
+            console.log(
+              `[HAPPO] Failed to fetch url ${fetchUrl} — ${fetchRes.statusText}`,
+            );
+            return;
+          }
+          archive.append(fetchRes.body, {
+            name,
+            date: FILE_CREATION_DATE,
+          });
+          item.name = `/${name}`;
+        } catch (e) {
+          console.log(`[HAPPO] Failed to fetch url ${fetchUrl}`);
+          console.error(e);
         }
-        archive.append(fetchRes.body, {
-          name,
-          date: FILE_CREATION_DATE,
-        });
-        item.name = `/${name}`;
       }
     });
 
