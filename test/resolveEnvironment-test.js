@@ -3,7 +3,7 @@ const resolveEnvironment = require('../src/resolveEnvironment');
 
 function testDevEnv() {
   const result = resolveEnvironment({});
-  assert.equal(result.beforeSha, undefined);
+  assert.equal(result.beforeSha, '__LATEST__');
   assert.ok(/^dev-[a-z0-9]+$/.test(result.afterSha));
   assert.equal(result.link, undefined);
   assert.equal(result.message, undefined);
