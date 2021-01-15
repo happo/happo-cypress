@@ -99,9 +99,9 @@ function resolveBeforeSha(env, afterSha) {
   }
 
   if (/^dev-/.test(afterSha)) {
-    // The afterSha has been auto-generated. Don't use a base commit in this
-    // scenario
-    return undefined;
+    // The afterSha has been auto-generated. Use the special __LATEST__ sha in
+    // these cases, forcing a comparison against the latest approved report.
+    return '__LATEST__';
   }
 
   if (TRAVIS_COMMIT_RANGE) {
