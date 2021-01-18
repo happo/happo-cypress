@@ -150,7 +150,6 @@ function getRawEnv(env) {
   return res;
 }
 
-
 module.exports = function resolveEnvironment(env = process.env) {
   const debugMode = env.HAPPO_DEBUG;
   const afterSha = resolveAfterSha(env);
@@ -161,6 +160,7 @@ module.exports = function resolveEnvironment(env = process.env) {
     afterSha,
     nonce: env.HAPPO_NONCE,
     debugMode,
+    notify: env.HAPPO_NOTIFY,
   };
   if (debugMode) {
     console.log('[HAPPO] Raw environment', getRawEnv(env));
