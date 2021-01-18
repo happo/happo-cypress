@@ -85,12 +85,14 @@ function testHappoEnv() {
     HAPPO_CURRENT_SHA: 'bdac2595db20ad2a6bf335b59510aa771125526a',
     HAPPO_PREVIOUS_SHA: 'hhhggg',
     HAPPO_CHANGE_URL: 'link://link',
+    HAPPO_NOTIFY: 'foo@bar.com,bar@foo.com',
   };
 
   let result = resolveEnvironment(happoEnv);
   assert.equal(result.beforeSha, 'hhhggg');
   assert.equal(result.afterSha, 'bdac2595db20ad2a6bf335b59510aa771125526a');
   assert.equal(result.link, 'link://link');
+  assert.equal(result.notify, 'foo@bar.com,bar@foo.com');
   assert.ok(result.message !== undefined);
 
   // Try with legacy overrides

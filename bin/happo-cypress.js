@@ -65,7 +65,14 @@ async function finalizeAll() {
     return;
   }
 
-  const { beforeSha, afterSha, link, message, nonce } = resolveEnvironment();
+  const {
+    beforeSha,
+    afterSha,
+    link,
+    message,
+    nonce,
+    notify,
+  } = resolveEnvironment();
   if (!nonce) {
     throw new Error('[HAPPO] Missing HAPPO_NONCE environment variable');
   }
@@ -87,6 +94,7 @@ async function finalizeAll() {
       link,
       message,
       isAsync: true,
+      notify,
     });
   }
 }
@@ -102,7 +110,14 @@ async function finalizeHappoReport() {
     return;
   }
 
-  const { beforeSha, afterSha, link, message, nonce } = resolveEnvironment();
+  const {
+    beforeSha,
+    afterSha,
+    link,
+    message,
+    nonce,
+    notify,
+  } = resolveEnvironment();
   const reportResult = await makeRequest(
     {
       url: `${happoConfig.endpoint}/api/async-reports/${afterSha}`,
@@ -136,6 +151,7 @@ async function finalizeHappoReport() {
         link,
         message,
         isAsync: true,
+        notify,
       });
     }
     console.log(`[HAPPO] ${jobResult.url}`);
