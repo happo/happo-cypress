@@ -223,3 +223,43 @@ Cypress.Commands.add(
     });
   },
 );
+
+Cypress.Commands.add(
+  'happoHideDynamicElements',
+  (options = {}) => {
+    const {
+      defaultMatchers = [
+        /[0-9]+\sdays?\sago/,
+        /[0-9]+\sminutes?\sago/,
+        /[0-9]{1,2}:[0-9]{2}/,
+      ],
+      matchers = [],
+      defaultSelectors = ['time'],
+      selectors = [],
+    } = options;
+    const allMatchers = defaultMatchers.concat(matchers);
+    const allSelectors = defaultSelectors.concat(selectors);
+    cy.document().then(doc => {
+      const elementsToHide = [];
+      doc.body.querySelectorAll('*').forEach(e => {
+        if (e.firstElementChild) {
+          return; // this is not a leaf element
+        }
+        const text = e.textContent;
+        if (allMatchers.some(regex => regex.test(text))) {
+          elementsToHide.push(e);
+        }
+      });
+
+      for (const selector of allSelectors) {
+        doc.body.querySelectorAll(selector).forEach(e => {
+          elementsToHide.push(e);
+        });
+      }
+      for (const e of elementsToHide) {
+        console.log('Hiding', e);
+        e.setAttribute('data-happo-hide', 'true');
+      }
+    });
+  },
+);
