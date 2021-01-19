@@ -2,6 +2,10 @@ describe('The Home Page', () => {
   it('successfully loads', () => {
     cy.visit('/');
     cy.wait(100);
+
+    cy.happoHideDynamicElements({ selectors: ['.hide-me'] });
+
+
     cy.get('body').happoScreenshot({ component: 'Full-page' });
     cy.get('body').happoScreenshot({
       component: 'Full-page',
@@ -29,11 +33,14 @@ describe('The Home Page', () => {
     });
     cy.get('.card').happoScreenshot({ component: 'Card' });
 
+    cy.get('.dynamic-text').happoScreenshot({ component: 'Dynamic text' });
+
     cy.get('.scrollcontainer')
       .scrollTo('center')
       .happoScreenshot({ component: 'Scrollcontainer', variant: 'center' });
 
     cy.visit('/');
+    cy.happoHideDynamicElements({ selectors: ['.hide-me'] });
     cy.wait(100);
     cy.get('.button').happoScreenshot({
       component: 'Button',

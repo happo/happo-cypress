@@ -85,6 +85,31 @@ export default function IndexPage() {
       <TaintedCanvasImage />
       <EmptyCanvasImage />
       <div style={{ background: 'url(#shadow)' }} />
+      <div
+        className="dynamic-text"
+        style={{ border: '1px solid gray', padding: 10, marginBottom: 20 }}
+      >
+        <h3>Hello</h3>
+        <p>
+          Created <span>5 days ago</span> by Tom Dooner. Updated
+          <i>
+            13 minutes ago
+          </i>
+          .
+        </p>
+        <p>
+          The time is now <span>2:54pm</span>. One minute ago was <i>2:53 PM</i>
+          .
+        </p>
+        <p>
+          In Sweden however, it's <time>54 minutes past 14</time>.
+        </p>
+
+        <p>
+          Here's some content that you can{' '}
+          <b className="hide-me">manually hide</b>.
+        </p>
+      </div>
       <div className="card">
         <h1>I'm a card</h1>
         <img
