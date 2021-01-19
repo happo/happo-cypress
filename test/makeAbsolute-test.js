@@ -30,6 +30,10 @@ function runTest() {
     makeAbsolute('/bar/foo.png', 'http://goo.bar/foo/'),
     'http://goo.bar/bar/foo.png',
   );
+  assert.equal(
+    makeAbsolute('./foo.png', 'http://goo.bar/'),
+    'http://goo.bar/foo.png',
+  );
 }
 
 runTest();
