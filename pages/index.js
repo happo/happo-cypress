@@ -139,6 +139,10 @@ export default function IndexPage() {
           className="image"
           src="http://localhost:7654/storyhotel-small.jpg?foobar=ignore"
         />
+        <img
+          className="image"
+          src="./storyhotel-small.jpg"
+        />
         <div
           className="image"
           style={{
