@@ -8,7 +8,12 @@ module.exports = function makeAbsolute(url, baseUrl) {
     return `${new URL(baseUrl).origin}${url}`;
   }
   if (url.startsWith('.')) {
-    return new URL(`${baseUrl}${url}`).href;
+    const parts = [baseUrl];
+    if (!/\/$/.test(baseUrl)) {
+      parts.push('/');
+    }
+    parts.push(url);
+    return new URL(parts.join('')).href;
   }
   if (/^https?:/.test(url)) {
     return url;
