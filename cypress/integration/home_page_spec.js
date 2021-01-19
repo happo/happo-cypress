@@ -5,7 +5,6 @@ describe('The Home Page', () => {
 
     cy.happoHideDynamicElements({ selectors: ['.hide-me'] });
 
-
     cy.get('body').happoScreenshot({ component: 'Full-page' });
     cy.get('body').happoScreenshot({
       component: 'Full-page',
@@ -33,14 +32,23 @@ describe('The Home Page', () => {
     });
     cy.get('.card').happoScreenshot({ component: 'Card' });
 
-    cy.get('.dynamic-text').happoScreenshot({ component: 'Dynamic text' });
+    cy.happoHideDynamicElements({ selectors: ['.hide-me'] });
+    cy.get('.dynamic-text').happoScreenshot({
+      component: 'Dynamic text',
+    });
+
+    cy.happoHideDynamicElements({ replace: true });
+    cy.get('.dynamic-text').happoScreenshot({
+      component: 'Dynamic text',
+      variant: 'replaced',
+    });
 
     cy.get('.scrollcontainer')
       .scrollTo('center')
       .happoScreenshot({ component: 'Scrollcontainer', variant: 'center' });
 
     cy.visit('/');
-    cy.happoHideDynamicElements({ selectors: ['.hide-me'] });
+    cy.happoHideDynamicElements({ replace: true, selectors: ['.hide-me'] });
     cy.wait(100);
     cy.get('.button').happoScreenshot({
       component: 'Button',

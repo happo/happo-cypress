@@ -236,6 +236,7 @@ Cypress.Commands.add(
       matchers = [],
       defaultSelectors = ['time'],
       selectors = [],
+      replace = false,
     } = options;
     const allMatchers = defaultMatchers.concat(matchers);
     const allSelectors = defaultSelectors.concat(selectors);
@@ -256,9 +257,36 @@ Cypress.Commands.add(
           elementsToHide.push(e);
         });
       }
-      for (const e of elementsToHide) {
-        console.log('Hiding', e);
-        e.setAttribute('data-happo-hide', 'true');
+      if (replace) {
+        const styleElement = doc.createElement('style');
+        styleElement.innerHTML = `
+          [data-happo-replaced] {
+            position: relative;
+          }
+          [data-happo-replaced]:after {
+            content: ' ';'
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: black;
+          }
+        `;
+        doc.head.appendChild(styleElement);
+
+        for (const e of elementsToHide) {
+          console.log('Replacing', e);
+          e.setAttribute('data-happo-replaced', 'true');
+          e.removeAttribute('data-happo-hide');
+        }
+      } else {
+        for (const e of elementsToHide) {
+          console.log('Hiding', e);
+          e.setAttribute('data-happo-hide', 'true');
+          e.removeAttribute('data-happo-replaced');
+        }
       }
     });
   },
