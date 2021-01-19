@@ -53,7 +53,16 @@ describe('The Home Page', () => {
     cy.get('.button').happoScreenshot({
       component: 'Button',
       variant: 'default',
-      targets: ['chromeSmall'],
+      targets: [
+        'chromeSmall',
+        { name: 'firefoxSmall', browser: 'firefox', viewport: '400x800' },
+      ],
+    });
+    cy.get('.card').happoScreenshot({
+      component: 'Card',
+      targets: [
+        { name: 'firefoxSmall', browser: 'firefox', viewport: '400x800' },
+      ],
     });
 
     cy.get('.images').happoScreenshot({

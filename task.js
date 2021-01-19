@@ -2,8 +2,8 @@ const fs = require('fs');
 
 const nodeFetch = require('node-fetch');
 const mkdirp = require('mkdirp');
-
 const makeRequest = require('happo.io/build/makeRequest').default;
+const { RemoteBrowserTarget } = require('happo.io');
 
 const createAssetPackage = require('./src/createAssetPackage');
 const proxiedFetch = require('./src/fetch');
@@ -76,6 +76,33 @@ function dedupeVariant(component, variant) {
   return `${variant}-${comp[variant]}`;
 }
 
+function handleDynamicTargets(targets) {
+  const result = [];
+  for (const target of targets) {
+    if (typeof target === 'string') {
+      result.push(target);
+    }
+    if (
+      typeof target === 'object' &&
+      target.name &&
+      target.viewport &&
+      target.browser
+    ) {
+      if (happoConfig.targets[target.name]) {
+        // already added
+      } else {
+        // add dynamic target
+        happoConfig.targets[target.name] = new RemoteBrowserTarget(
+          target.browser,
+          target,
+        );
+      }
+      result.push(target.name);
+    }
+  }
+  return result;
+}
+
 module.exports = {
   happoRegisterSnapshot({
     html,
@@ -83,13 +110,14 @@ module.exports = {
     cssBlocks,
     component,
     variant: rawVariant,
-    targets,
+    targets: rawTargets,
   }) {
     if (!happoConfig) {
       return null;
     }
     const variant = dedupeVariant(component, rawVariant);
     snapshotAssetUrls.push(...assetUrls);
+    const targets = rawTargets ? handleDynamicTargets(rawTargets) : undefined;
     snapshots.push({ html, component, variant, targets });
     cssBlocks.forEach(block => {
       if (allCssBlocks.some(b => b.key === block.key)) {
