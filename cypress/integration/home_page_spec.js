@@ -60,6 +60,7 @@ describe('The Home Page', () => {
     });
     cy.get('.card').happoScreenshot({
       component: 'Card',
+      variant: 'firefox-only',
       targets: [
         { name: 'firefoxSmall', browser: 'firefox', viewport: '400x800' },
       ],
