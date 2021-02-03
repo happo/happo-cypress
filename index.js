@@ -1,5 +1,5 @@
+const chunked = require('./src/chunked.js');
 const md5 = require('crypto-js/md5');
-
 const parseSrcset = require('parse-srcset');
 
 const findCSSAssetUrls = require('./src/findCSSAssetUrls');
@@ -16,6 +16,7 @@ const COMMENT_PATTERN = /^\/\*.+\*\/$/;
 
 let config = {
   responsiveInlinedCanvases: false,
+  canvasChunkSize: 200000, // 800 Kb per chunk
 };
 
 module.exports = {
@@ -69,7 +70,19 @@ function getSubjectAssetUrls(subject, doc) {
     const style = element.getAttribute('style');
     const base64Url = element._base64Url;
     if (base64Url) {
-      cy.task('happoRegisterBase64Image', { base64Url, src });
+      const rawBase64 = base64Url.replace(/^data:image\/png;base64,/, '');
+      const chunks = chunked(rawBase64, config.canvasChunkSize);
+      for (let i = 0; i < chunks.length; i++) {
+        const base64Chunk = chunks[i];
+        const isFirst = i === 0;
+        const isLast = i === chunks.length - 1;
+        cy.task('happoRegisterBase64Image', {
+          base64Chunk,
+          src,
+          isFirst,
+          isLast,
+        });
+      }
     }
     if (src) {
       allUrls.push({ url: src, baseUrl });
@@ -224,42 +237,40 @@ Cypress.Commands.add(
   },
 );
 
-Cypress.Commands.add(
-  'happoHideDynamicElements',
-  (options = {}) => {
-    const {
-      defaultMatchers = [
-        /[0-9]+\sdays?\sago/,
-        /[0-9]+\sminutes?\sago/,
-        /[0-9]{1,2}:[0-9]{2}/,
-      ],
-      matchers = [],
-      defaultSelectors = ['time'],
-      selectors = [],
-      replace = false,
-    } = options;
-    const allMatchers = defaultMatchers.concat(matchers);
-    const allSelectors = defaultSelectors.concat(selectors);
-    cy.document().then(doc => {
-      const elementsToHide = [];
-      doc.body.querySelectorAll('*').forEach(e => {
-        if (e.firstElementChild) {
-          return; // this is not a leaf element
-        }
-        const text = e.textContent;
-        if (allMatchers.some(regex => regex.test(text))) {
-          elementsToHide.push(e);
-        }
-      });
-
-      for (const selector of allSelectors) {
-        doc.body.querySelectorAll(selector).forEach(e => {
-          elementsToHide.push(e);
-        });
+Cypress.Commands.add('happoHideDynamicElements', (options = {}) => {
+  const {
+    defaultMatchers = [
+      /[0-9]+\sdays?\sago/,
+      /[0-9]+\sminutes?\sago/,
+      /[0-9]{1,2}:[0-9]{2}/,
+    ],
+    matchers = [],
+    defaultSelectors = ['time'],
+    selectors = [],
+    replace = false,
+  } = options;
+  const allMatchers = defaultMatchers.concat(matchers);
+  const allSelectors = defaultSelectors.concat(selectors);
+  cy.document().then(doc => {
+    const elementsToHide = [];
+    doc.body.querySelectorAll('*').forEach(e => {
+      if (e.firstElementChild) {
+        return; // this is not a leaf element
       }
-      if (replace) {
-        const styleElement = doc.createElement('style');
-        styleElement.innerHTML = `
+      const text = e.textContent;
+      if (allMatchers.some(regex => regex.test(text))) {
+        elementsToHide.push(e);
+      }
+    });
+
+    for (const selector of allSelectors) {
+      doc.body.querySelectorAll(selector).forEach(e => {
+        elementsToHide.push(e);
+      });
+    }
+    if (replace) {
+      const styleElement = doc.createElement('style');
+      styleElement.innerHTML = `
           [data-happo-replaced] {
             position: relative;
           }
@@ -274,20 +285,19 @@ Cypress.Commands.add(
             background-color: black;
           }
         `;
-        doc.head.appendChild(styleElement);
+      doc.head.appendChild(styleElement);
 
-        for (const e of elementsToHide) {
-          console.log('Replacing', e);
-          e.setAttribute('data-happo-replaced', 'true');
-          e.removeAttribute('data-happo-hide');
-        }
-      } else {
-        for (const e of elementsToHide) {
-          console.log('Hiding', e);
-          e.setAttribute('data-happo-hide', 'true');
-          e.removeAttribute('data-happo-replaced');
-        }
+      for (const e of elementsToHide) {
+        console.log('Replacing', e);
+        e.setAttribute('data-happo-replaced', 'true');
+        e.removeAttribute('data-happo-hide');
       }
-    });
-  },
-);
+    } else {
+      for (const e of elementsToHide) {
+        console.log('Hiding', e);
+        e.setAttribute('data-happo-hide', 'true');
+        e.removeAttribute('data-happo-replaced');
+      }
+    }
+  });
+});
