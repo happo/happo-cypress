@@ -1,11 +1,13 @@
+const mkdirp = require('mkdirp');
+const nodeFetch = require('node-fetch');
+
 const fs = require('fs');
 
-const nodeFetch = require('node-fetch');
-const mkdirp = require('mkdirp');
 const makeRequest = require('happo.io/build/makeRequest').default;
 const { RemoteBrowserTarget } = require('happo.io');
 
 const createAssetPackage = require('./src/createAssetPackage');
+const convertBase64FileToReal = require('./src/convertBase64FileToReal');
 const proxiedFetch = require('./src/fetch');
 const findCSSAssetUrls = require('./src/findCSSAssetUrls');
 const loadHappoConfig = require('./src/loadHappoConfig');
@@ -135,19 +137,35 @@ module.exports = {
     return null;
   },
 
-  async happoRegisterBase64Image({ base64Url, src }) {
-    const data = base64Url.replace(/^data:image\/png;base64,/, '');
-    const buffer = Buffer.from(data, 'base64');
-    await mkdirp('.happo-tmp/_inlined');
-    await new Promise((resolve, reject) =>
-      fs.writeFile(src.slice(1), buffer, { encoding: null }, e => {
-        if (e) {
-          reject(e);
-        } else {
-          resolve();
-        }
-      }),
-    );
+  async happoRegisterBase64Image({ base64Chunk, src, isFirst, isLast }) {
+    const filename = src.slice(1);
+    const filenameB64 = `${filename}.b64`;
+    if (isFirst) {
+      await mkdirp('.happo-tmp/_inlined');
+      await new Promise((resolve, reject) =>
+        fs.writeFile(filenameB64, base64Chunk, e => {
+          if (e) {
+            reject(e);
+          } else {
+            resolve();
+          }
+        }),
+      );
+    } else {
+      await new Promise((resolve, reject) =>
+        fs.appendFile(filenameB64, base64Chunk, e => {
+          if (e) {
+            reject(e);
+          } else {
+            resolve();
+          }
+        }),
+      );
+    }
+
+    if (isLast) {
+      await convertBase64FileToReal(filenameB64, filename);
+    }
     return null;
   },
 
