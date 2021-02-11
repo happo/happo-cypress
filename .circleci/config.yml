@@ -24,14 +24,6 @@ workflows:
           yarn: true
 
       - cypress/run:
-          name: cypress-serial
-          requires:
-            - cypress/install
-          yarn: true
-          start: yarn dev
-          command-prefix: node bin/happo-cypress.js -- yarn
-
-      - cypress/run:
           name: cypress-download-all
           requires:
             - cypress/install

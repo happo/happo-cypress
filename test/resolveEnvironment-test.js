@@ -1,3 +1,4 @@
+const path = require('path');
 const assert = require('assert');
 const resolveEnvironment = require('../src/resolveEnvironment');
 
@@ -43,6 +44,34 @@ function testCircleCIEnv() {
   assert.equal(
     result.link,
     'https://github.com/happo/happo-view/commit/abcdef',
+  );
+  assert.ok(result.message !== undefined);
+}
+
+function testGithubActionsEnvironment() {
+  const githubEnv = {
+    GITHUB_EVENT_PATH: path.resolve(
+      __dirname,
+      'github_pull_request_event.json',
+    ),
+  };
+  let result = resolveEnvironment(githubEnv);
+  assert.equal(result.beforeSha, 'f95f852bd8fca8fcc58a9a2d6c842781e32a215e');
+  assert.equal(result.afterSha, 'ec26c3e57ca3a959ca5aad62de7213c562f8c821');
+  assert.equal(result.link, 'https://github.com/Codertocat/Hello-World/pull/2');
+  assert.equal(result.message, 'Update the README with new information.');
+
+  // Try with a push event
+  githubEnv.GITHUB_EVENT_PATH = path.resolve(
+    __dirname,
+    'github_push_event.json',
+  );
+  result = resolveEnvironment(githubEnv);
+  assert.equal(result.beforeSha, '6113728f27ae82c7b1a177c8d03f9e96e0adf246');
+  assert.equal(result.afterSha, '0000000000000000000000000000000000000000');
+  assert.equal(
+    result.link,
+    'https://github.com/foo/bar/commit/0000000000000000000000000000000000000000',
   );
   assert.ok(result.message !== undefined);
 }
@@ -121,6 +150,7 @@ function testHappoEnv() {
 }
 
 function runTest() {
+  testGithubActionsEnvironment();
   testDevEnv();
   testCircleCIEnv();
   testTravisEnv();

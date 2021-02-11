@@ -37,6 +37,7 @@ function resolveLink(env) {
     CIRCLE_PROJECT_USERNAME,
     CIRCLE_PROJECT_REPONAME,
     CIRCLE_SHA1,
+    GITHUB_EVENT_PATH,
   } = env;
 
   if (HAPPO_CHANGE_URL) {
@@ -50,6 +51,14 @@ function resolveLink(env) {
   if (CI_PULL_REQUEST) {
     // Circle CI
     return CI_PULL_REQUEST;
+  }
+
+  if (GITHUB_EVENT_PATH) {
+    const ghEvent = require(GITHUB_EVENT_PATH);
+    if (ghEvent.pull_request) {
+      return ghEvent.pull_request.html_url;
+    }
+    return ghEvent.head_commit.url;
   }
 
   const githubBase = HAPPO_GITHUB_BASE || GITHUB_BASE || 'https://github.com';
@@ -69,7 +78,18 @@ function resolveLink(env) {
   return undefined;
 }
 
-function resolveMessage() {
+function resolveMessage(env) {
+  const {
+    GITHUB_EVENT_PATH,
+  } = env;
+
+  if (GITHUB_EVENT_PATH) {
+    const ghEvent = require(GITHUB_EVENT_PATH);
+    if (ghEvent.pull_request) {
+      return ghEvent.pull_request.title;
+    }
+  }
+
   const res = spawnSync('git', ['log', '-1', '--pretty=%s'], {
     encoding: 'utf-8',
   });
@@ -85,6 +105,7 @@ function resolveBeforeSha(env, afterSha) {
     PREVIOUS_SHA,
     HAPPO_BASE_BRANCH,
     TRAVIS_COMMIT_RANGE,
+    GITHUB_EVENT_PATH,
 
     // legacy
     BASE_BRANCH,
@@ -102,6 +123,14 @@ function resolveBeforeSha(env, afterSha) {
     // The afterSha has been auto-generated. Use the special __LATEST__ sha in
     // these cases, forcing a comparison against the latest approved report.
     return '__LATEST__';
+  }
+
+  if (GITHUB_EVENT_PATH) {
+    const ghEvent = require(GITHUB_EVENT_PATH);
+    if (ghEvent.pull_request) {
+      return ghEvent.pull_request.base.sha;
+    }
+    return ghEvent.before;
   }
 
   if (TRAVIS_COMMIT_RANGE) {
@@ -129,6 +158,7 @@ function resolveAfterSha(env) {
     CIRCLE_SHA1,
     TRAVIS_PULL_REQUEST_SHA,
     TRAVIS_COMMIT,
+    GITHUB_EVENT_PATH,
   } = env;
   const sha =
     HAPPO_CURRENT_SHA ||
@@ -138,6 +168,13 @@ function resolveAfterSha(env) {
     TRAVIS_COMMIT;
   if (sha) {
     return sha;
+  }
+  if (GITHUB_EVENT_PATH) {
+    const ghEvent = require(GITHUB_EVENT_PATH);
+    if (ghEvent.pull_request) {
+      return ghEvent.pull_request.head.sha;
+    }
+    return ghEvent.after;
   }
   return `dev-${crypto.randomBytes(4).toString('hex')}`;
 }
