@@ -25,12 +25,17 @@ module.exports = {
   },
 };
 
+function getBaseUrlWithPath(doc) {
+  return doc.location.href.slice(0, doc.location.href.lastIndexOf('/') + 1);
+}
+
 function extractCSSBlocks({ doc }) {
   const blocks = [];
   const styleElements = doc.querySelectorAll(
     'style,link[rel="stylesheet"][href]',
   );
-  const baseUrl = doc.location.origin;
+  const baseUrl = getBaseUrlWithPath(doc);
+
   styleElements.forEach(element => {
     if (element.tagName === 'LINK') {
       // <link href>
@@ -59,7 +64,7 @@ function getSubjectAssetUrls(subject, doc) {
   const allElements = [subject].concat(
     Array.from(subject.querySelectorAll('*')),
   );
-  const baseUrl = doc.location.origin;
+  const baseUrl = getBaseUrlWithPath(doc);
   allElements.forEach(element => {
     if (element.tagName === 'SCRIPT') {
       // skip script elements
