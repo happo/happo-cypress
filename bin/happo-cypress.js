@@ -33,12 +33,32 @@ function parseAllowFailures(argv) {
   return argv.indexOf('--allow-failures') > -1;
 }
 
+async function postAsyncReport({ nonce, afterSha, requestIds }) {
+  const happoConfig = await loadHappoConfig();
+  if (!happoConfig) {
+    return;
+  }
+  return await makeRequest(
+    {
+      url: `${happoConfig.endpoint}/api/async-reports/${afterSha}`,
+      method: 'POST',
+      json: true,
+      body: {
+        requestIds,
+        project: happoConfig.project,
+        nonce,
+      },
+    },
+    { ...happoConfig, maxTries: 3 },
+  );
+}
+
 function requestHandler(req, res) {
   const bodyParts = [];
   req.on('data', chunk => {
     bodyParts.push(chunk.toString());
   });
-  req.on('end', () => {
+  req.on('end', async () => {
     const potentialIds = bodyParts
       .join('')
       .split('\n')
@@ -54,6 +74,12 @@ function requestHandler(req, res) {
     potentialIds.forEach(requestId => {
       allRequestIds.add(parseInt(requestId, 10));
     });
+
+    const { afterSha, nonce } = resolveEnvironment();
+    if (nonce && potentialIds.length) {
+      // Associate these snapRequests with the async report as soon as possible
+      await postAsyncReport({ requestIds: potentialIds, afterSha, nonce });
+    }
     res.writeHead(200);
     res.end('');
   });
@@ -118,20 +144,11 @@ async function finalizeHappoReport() {
     nonce,
     notify,
   } = resolveEnvironment();
-  const reportResult = await makeRequest(
-    {
-      url: `${happoConfig.endpoint}/api/async-reports/${afterSha}`,
-      method: 'POST',
-      json: true,
-      body: {
-        requestIds: [...allRequestIds],
-        project: happoConfig.project,
-        nonce,
-      },
-    },
-    { ...happoConfig, maxTries: 3 },
-  );
-
+  const reportResult = await postAsyncReport({
+    requestIds: [...allRequestIds],
+    nonce,
+    afterSha,
+  });
   if (beforeSha) {
     const jobResult = await makeRequest(
       {
