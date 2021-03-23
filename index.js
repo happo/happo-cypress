@@ -4,8 +4,23 @@ const parseSrcset = require('parse-srcset');
 
 const findCSSAssetUrls = require('./src/findCSSAssetUrls');
 
+const CSS_ELEMENTS_SELECTOR = 'style,link[rel="stylesheet"][href]';
+
+function getBaseUrlWithPath(doc) {
+  return doc.location.href.slice(0, doc.location.href.lastIndexOf('/') + 1);
+}
+
 before(() => {
   cy.task('happoInit');
+  cy.on('window:load', window => {
+    const styleElements = window.document.querySelectorAll(
+      CSS_ELEMENTS_SELECTOR,
+    );
+    const baseUrl = getBaseUrlWithPath(window.document);
+    for (const element of styleElements) {
+      element.baseUrl = baseUrl;
+    }
+  });
 });
 
 after(() => {
@@ -25,22 +40,16 @@ module.exports = {
   },
 };
 
-function getBaseUrlWithPath(doc) {
-  return doc.location.href.slice(0, doc.location.href.lastIndexOf('/') + 1);
-}
-
 function extractCSSBlocks({ doc }) {
   const blocks = [];
-  const styleElements = doc.querySelectorAll(
-    'style,link[rel="stylesheet"][href]',
-  );
+  const styleElements = doc.querySelectorAll(CSS_ELEMENTS_SELECTOR);
   const baseUrl = getBaseUrlWithPath(doc);
 
   styleElements.forEach(element => {
     if (element.tagName === 'LINK') {
       // <link href>
       const href = element.getAttribute('href');
-      blocks.push({ key: href, href, baseUrl });
+      blocks.push({ key: href, href, baseUrl: element.baseUrl || baseUrl });
     } else {
       // <style>
       const lines = Array.from(element.sheet.cssRules).map(r => r.cssText);
@@ -53,7 +62,7 @@ function extractCSSBlocks({ doc }) {
 
       // Create a hash so that we can dedupe equal styles
       const key = md5(content).toString();
-      blocks.push({ content, key, baseUrl });
+      blocks.push({ content, key, baseUrl: element.baseUrl || baseUrl });
     }
   });
   return blocks;
