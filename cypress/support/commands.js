@@ -29,3 +29,10 @@ import { configure } from '../../';
 
 configure({ responsiveInlinedCanvases: false });
 
+Cypress.Commands.add('getIframe', () => {
+  return cy
+    .get('iframe')
+    .its('0.contentDocument')
+    .its('body')
+    .then(cy.wrap);
+});

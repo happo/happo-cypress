@@ -216,38 +216,38 @@ Cypress.Commands.add(
   (originalSubject, options = {}) => {
     const component = options.component || cy.state('runnable').fullTitle();
     const variant = options.variant || 'default';
-    cy.document().then(doc => {
-      const { subject, cleanup: canvasCleanup } = inlineCanvases(
-        doc,
-        originalSubject[0],
-        options,
-      );
-      registerScrollPositions(doc);
 
-      const transformCleanup = options.transformDOM
-        ? transformDOM({
-            doc,
-            subject,
-            ...options.transformDOM,
-          })
-        : undefined;
+    const doc = originalSubject[0].ownerDocument;
+    const { subject, cleanup: canvasCleanup } = inlineCanvases(
+      doc,
+      originalSubject[0],
+      options,
+    );
+    registerScrollPositions(doc);
 
-      const html = subject.outerHTML;
-      const assetUrls = getSubjectAssetUrls(subject, doc);
-      const cssBlocks = extractCSSBlocks({ doc });
-      cy.task('happoRegisterSnapshot', {
-        html,
-        cssBlocks,
-        assetUrls,
-        component,
-        variant,
-        targets: options.targets,
-      });
-      if (transformCleanup) {
-        transformCleanup();
-      }
-      canvasCleanup();
+    const transformCleanup = options.transformDOM
+      ? transformDOM({
+          doc,
+          subject,
+          ...options.transformDOM,
+        })
+      : undefined;
+
+    const html = subject.outerHTML;
+    const assetUrls = getSubjectAssetUrls(subject, doc);
+    const cssBlocks = extractCSSBlocks({ doc });
+    cy.task('happoRegisterSnapshot', {
+      html,
+      cssBlocks,
+      assetUrls,
+      component,
+      variant,
+      targets: options.targets,
     });
+    if (transformCleanup) {
+      transformCleanup();
+    }
+    canvasCleanup();
   },
 );
 
