@@ -233,6 +233,9 @@ Cypress.Commands.add(
         })
       : undefined;
 
+    subject.querySelectorAll('script').forEach(scriptEl => {
+      scriptEl.parentNode.removeChild(scriptEl);
+    });
     const html = subject.outerHTML;
     const assetUrls = getSubjectAssetUrls(subject, doc);
     const cssBlocks = extractCSSBlocks({ doc });
