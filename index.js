@@ -236,6 +236,14 @@ Cypress.Commands.add(
     subject.querySelectorAll('script').forEach(scriptEl => {
       scriptEl.parentNode.removeChild(scriptEl);
     });
+    const htmlElementClass = subject.ownerDocument.documentElement.getAttribute('class');
+    if (htmlElementClass) {
+      const el = document.createElement('script');
+      el.innerHTML = `
+        document.documentElement.setAttribute('class', ${JSON.stringify(htmlElementClass)});
+      `;
+      subject.appendChild(el);
+    }
     const html = subject.outerHTML;
     const assetUrls = getSubjectAssetUrls(subject, doc);
     const cssBlocks = extractCSSBlocks({ doc });

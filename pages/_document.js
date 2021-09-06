@@ -10,7 +10,7 @@ class MyDocument extends Document {
 
   render() {
     return (
-      <Html lang="en">
+      <Html lang="en" className="html-rocks">
         <Head>
           <link
             href="https://fonts.googleapis.com/css?family=Lobster&display=swap"
