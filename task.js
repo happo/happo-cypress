@@ -120,6 +120,8 @@ module.exports = {
     component,
     variant: rawVariant,
     targets: rawTargets,
+    htmlElementAttrs,
+    bodyElementAttrs,
   }) {
     if (!happoConfig) {
       return null;
@@ -127,7 +129,14 @@ module.exports = {
     const variant = dedupeVariant(component, rawVariant);
     snapshotAssetUrls.push(...assetUrls);
     const targets = handleDynamicTargets(rawTargets);
-    snapshots.push({ html, component, variant, targets });
+    snapshots.push({
+      html,
+      component,
+      variant,
+      targets,
+      htmlElementAttrs,
+      bodyElementAttrs,
+    });
     cssBlocks.forEach(block => {
       if (allCssBlocks.some(b => b.key === block.key)) {
         return;
