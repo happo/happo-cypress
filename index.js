@@ -210,6 +210,14 @@ function registerScrollPositions(doc) {
   }
 }
 
+function extractAttributes(el) {
+  const result = {};
+  [...el.attributes].forEach(item => {
+    result[item.name] = item.value;
+  });
+  return result;
+}
+
 Cypress.Commands.add(
   'happoScreenshot',
   { prevSubject: true },
@@ -245,6 +253,8 @@ Cypress.Commands.add(
       assetUrls,
       component,
       variant,
+      htmlElementAttrs: extractAttributes(subject.ownerDocument.documentElement),
+      bodyElementAttrs: extractAttributes(subject.ownerDocument.body),
       targets: options.targets,
     });
     if (transformCleanup) {
