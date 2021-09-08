@@ -98,6 +98,7 @@ async function finalizeAll() {
     message,
     nonce,
     notify,
+    fallbackShas,
   } = resolveEnvironment();
   if (!nonce) {
     throw new Error('[HAPPO] Missing HAPPO_NONCE environment variable');
@@ -121,6 +122,7 @@ async function finalizeAll() {
       message,
       isAsync: true,
       notify,
+      fallbackShas,
     });
   }
 }
@@ -143,6 +145,7 @@ async function finalizeHappoReport() {
     message,
     nonce,
     notify,
+    fallbackShas,
   } = resolveEnvironment();
   const reportResult = await postAsyncReport({
     requestIds: [...allRequestIds],
@@ -169,6 +172,7 @@ async function finalizeHappoReport() {
         message,
         isAsync: true,
         notify,
+        fallbackShas,
       });
     }
     console.log(`[HAPPO] ${jobResult.url}`);

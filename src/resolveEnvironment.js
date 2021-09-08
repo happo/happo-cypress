@@ -16,6 +16,8 @@ const envKeys = [
   'HAPPO_DEBUG',
   'HAPPO_GITHUB_BASE',
   'HAPPO_PREVIOUS_SHA',
+  'HAPPO_FALLBACK_SHAS',
+  'HAPPO_FALLBACK_SHAS_COUNT',
   'PREVIOUS_SHA',
   'TRAVIS_COMMIT',
   'TRAVIS_PULL_REQUEST',
@@ -79,9 +81,7 @@ function resolveLink(env) {
 }
 
 function resolveMessage(env) {
-  const {
-    GITHUB_EVENT_PATH,
-  } = env;
+  const { GITHUB_EVENT_PATH } = env;
 
   if (GITHUB_EVENT_PATH) {
     const ghEvent = require(GITHUB_EVENT_PATH);
@@ -179,6 +179,32 @@ function resolveAfterSha(env) {
   return `dev-${crypto.randomBytes(4).toString('hex')}`;
 }
 
+function resolveFallbackShas(env, beforeSha) {
+  const { HAPPO_FALLBACK_SHAS, HAPPO_FALLBACK_SHAS_COUNT = 50 } = env;
+
+  if (HAPPO_FALLBACK_SHAS) {
+    return HAPPO_FALLBACK_SHAS;
+  }
+
+  const res = spawnSync(
+    'git',
+    [
+      'log',
+      '--format=%H',
+      '--first-parent',
+      `--max-count=${HAPPO_FALLBACK_SHAS_COUNT}`,
+      beforeSha,
+    ],
+    {
+      encoding: 'utf-8',
+    },
+  );
+  if (res.status !== 0) {
+    return undefined;
+  }
+  return res.stdout;
+}
+
 function getRawEnv(env) {
   const res = {};
   for (const key of envKeys) {
@@ -190,14 +216,16 @@ function getRawEnv(env) {
 module.exports = function resolveEnvironment(env = process.env) {
   const debugMode = env.HAPPO_DEBUG;
   const afterSha = resolveAfterSha(env);
+  const beforeSha = resolveBeforeSha(env, afterSha);
   const result = {
     link: resolveLink(env),
     message: /^dev-/.test(afterSha) ? undefined : resolveMessage(env),
-    beforeSha: resolveBeforeSha(env, afterSha),
+    beforeSha,
     afterSha,
     nonce: env.HAPPO_NONCE,
     debugMode,
     notify: env.HAPPO_NOTIFY,
+    fallbackShas: resolveFallbackShas(env, beforeSha),
   };
   if (debugMode) {
     console.log('[HAPPO] Raw environment', getRawEnv(env));
