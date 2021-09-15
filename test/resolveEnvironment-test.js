@@ -99,12 +99,23 @@ function testTravisEnv() {
     TRAVIS_PULL_REQUEST: undefined,
     TRAVIS_COMMIT_RANGE: undefined,
     TRAVIS_COMMIT: '4521c1411c5c0ad19fd72fa31b12363ab54d5eab',
+    HAPPO_FALLBACK_SHAS_COUNT: '5',
   });
 
   assert.equal(result.afterSha, '4521c1411c5c0ad19fd72fa31b12363ab54d5eab');
   assert.equal(
     result.link,
     'http://git.hub/owner/repo/commit/4521c1411c5c0ad19fd72fa31b12363ab54d5eab',
+  );
+  assert.equal(
+    result.fallbackShas,
+    `
+62aa0e29b68d0d2e812ad21064b22bf627400ab8
+c9698e46a96eb1c695c9ef69e478e78703701f6b
+0520795dc6d5f02219c153e9502c3510ead2e1c0
+c7729934ee346351747c7af7f4ed570ce6ba3397
+bdac2595db20ad2a6bf335b59510aa771125526a
+`.trimStart(),
   );
   assert.ok(result.message !== undefined);
 }

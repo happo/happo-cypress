@@ -193,7 +193,7 @@ function resolveFallbackShas(env, beforeSha) {
       '--format=%H',
       '--first-parent',
       `--max-count=${HAPPO_FALLBACK_SHAS_COUNT}`,
-      beforeSha,
+      `${beforeSha}^`,
     ],
     {
       encoding: 'utf-8',
