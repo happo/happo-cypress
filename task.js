@@ -252,34 +252,33 @@ Docs:
       }
     }
     const allRequestIds = [];
-    await Promise.all(
-      Object.keys(happoConfig.targets).map(async name => {
-        if (HAPPO_DEBUG) {
-          console.log(`[HAPPO] Sending snap-request(s) for target=${name}`);
-        }
-        const snapshotsForTarget = snapshots.filter(
-          ({ targets }) => !targets || targets.includes(name),
+    for (const name of Object.keys(happoConfig.targets)) {
+      if (HAPPO_DEBUG) {
+        console.log(`[HAPPO] Sending snap-request(s) for target=${name}`);
+      }
+      const snapshotsForTarget = snapshots.filter(
+        ({ targets }) => !targets || targets.includes(name),
+      );
+      const requestIds = await happoConfig.targets[name].execute({
+        targetName: name,
+        asyncResults: true,
+        endpoint: happoConfig.endpoint,
+        globalCSS,
+        assetsPackage: assetsRes.path,
+        snapPayloads: snapshotsForTarget,
+        apiKey: happoConfig.apiKey,
+        apiSecret: happoConfig.apiSecret,
+      });
+      if (HAPPO_DEBUG) {
+        console.log(
+          `[HAPPO] Snap-request(s) for target=${name} created with ID(s)=${requestIds.join(
+            ',',
+          )}`,
         );
-        const requestIds = await happoConfig.targets[name].execute({
-          targetName: name,
-          asyncResults: true,
-          endpoint: happoConfig.endpoint,
-          globalCSS,
-          assetsPackage: assetsRes.path,
-          snapPayloads: snapshotsForTarget,
-          apiKey: happoConfig.apiKey,
-          apiSecret: happoConfig.apiSecret,
-        });
-        if (HAPPO_DEBUG) {
-          console.log(
-            `[HAPPO] Snap-request(s) for target=${name} created with ID(s)=${requestIds.join(
-              ',',
-            )}`,
-          );
-        }
-        allRequestIds.push(...requestIds);
-      }),
-    );
+      }
+      allRequestIds.push(...requestIds);
+    }
+
     if (HAPPO_CYPRESS_PORT) {
       // We're running with `happo-cypress --`
       const fetchRes = await nodeFetch(
