@@ -27,12 +27,11 @@
 // Add happo command:
 import { configure } from '../../';
 
-configure({ responsiveInlinedCanvases: false });
+configure({
+  responsiveInlinedCanvases: false,
+  localSnapshots: process.env.HAPPO_USE_LOCAL_SNAPSHOTS === 'true',
+});
 
 Cypress.Commands.add('getIframe', () => {
-  return cy
-    .get('iframe')
-    .its('0.contentDocument')
-    .its('body')
-    .then(cy.wrap);
+  return cy.get('iframe').its('0.contentDocument').its('body').then(cy.wrap);
 });

@@ -218,6 +218,25 @@ function extractAttributes(el) {
   return result;
 }
 
+function resolveTargetName() {
+  const { viewportHeight, viewportWidth } = Cypress.config();
+  return `${Cypress.browser.name}-${viewportWidth}x${viewportHeight}`;
+}
+
+function takeLocalSnapshot({ originalSubject, component, variant, options }) {
+  const imageId = `${Math.random()}`.slice(2);
+  cy.task('happoRegisterLocalSnapshot', {
+    imageId,
+    component,
+    variant,
+    targets: options.targets,
+    target: resolveTargetName(),
+  });
+  cy.wrap(originalSubject, { log: false })
+    .first()
+    .screenshot(imageId, options);
+}
+
 Cypress.Commands.add(
   'happoScreenshot',
   { prevSubject: true },
@@ -225,6 +244,14 @@ Cypress.Commands.add(
     const component = options.component || cy.state('runnable').fullTitle();
     const variant = options.variant || 'default';
 
+    if (config.localSnapshots) {
+      return takeLocalSnapshot({
+        originalSubject,
+        component,
+        variant,
+        options,
+      });
+    }
     const doc = originalSubject[0].ownerDocument;
     const { subject, cleanup: canvasCleanup } = inlineCanvases(
       doc,
@@ -253,7 +280,9 @@ Cypress.Commands.add(
       assetUrls,
       component,
       variant,
-      htmlElementAttrs: extractAttributes(subject.ownerDocument.documentElement),
+      htmlElementAttrs: extractAttributes(
+        subject.ownerDocument.documentElement,
+      ),
       bodyElementAttrs: extractAttributes(subject.ownerDocument.body),
       targets: options.targets,
     });

@@ -1,7 +1,8 @@
+const crypto = require('crypto');
+const fs = require('fs');
+
 const mkdirp = require('mkdirp');
 const nodeFetch = require('node-fetch');
-
-const fs = require('fs');
 
 const makeRequest = require('happo.io/build/makeRequest').default;
 const { RemoteBrowserTarget } = require('happo.io');
@@ -18,6 +19,8 @@ const resolveEnvironment = require('./src/resolveEnvironment');
 const { HAPPO_CYPRESS_PORT, HAPPO_DEBUG, HAPPO_ENABLED } = process.env;
 
 let snapshots;
+let localSnapshots;
+let localSnapshotImages;
 let allCssBlocks;
 let snapshotAssetUrls;
 let happoConfig;
@@ -112,6 +115,109 @@ function handleDynamicTargets(targets) {
   return result;
 }
 
+async function uploadLocalSnapshots() {
+  const reportResult = await makeRequest(
+    {
+      url: `${happoConfig.endpoint}/api/snap-requests/with-results`,
+      method: 'POST',
+      json: true,
+      body: {
+        snaps: localSnapshots,
+      },
+    },
+    { ...happoConfig, maxTries: 3 },
+  );
+  return reportResult.requestId;
+}
+
+async function uploadImage(pathToFile) {
+  if (HAPPO_DEBUG) {
+    console.log(`[HAPPO] Uploading image: ${pathToFile}`);
+  }
+  const buffer = await fs.promises.readFile(pathToFile);
+  const hash = crypto.createHash('md5').update(buffer).digest('hex');
+
+  const uploadUrlResult = await makeRequest(
+    {
+      url: `${happoConfig.endpoint}/api/images/${hash}/upload-url`,
+      method: 'GET',
+      json: true,
+    },
+    { ...happoConfig, maxTries: 2 },
+  );
+
+  if (!uploadUrlResult.uploadUrl) {
+    // image has already been uploaded
+    if (HAPPO_DEBUG) {
+      console.log(
+        `[HAPPO] Image has already been uploaded: ${uploadUrlResult.url}`,
+      );
+    }
+    return uploadUrlResult.url;
+  }
+
+  const uploadResult = await makeRequest(
+    {
+      url: uploadUrlResult.uploadUrl,
+      method: 'POST',
+      json: true,
+      formData: {
+        file: {
+          options: {
+            filename: 'image.png',
+            contentType: 'image/png',
+          },
+          value: buffer,
+        },
+      },
+    },
+    { ...happoConfig, maxTries: 2 },
+  );
+  if (HAPPO_DEBUG) {
+    console.log(`[HAPPO] Uploaded image: ${uploadUrlResult.url}`);
+  }
+  return uploadResult.url;
+}
+
+async function processSnapRequestIds(allRequestIds) {
+  if (HAPPO_CYPRESS_PORT) {
+    // We're running with `happo-cypress --`
+    const fetchRes = await nodeFetch(
+      `http://localhost:${HAPPO_CYPRESS_PORT}/`,
+      {
+        method: 'POST',
+        body: allRequestIds.join('\n'),
+      },
+    );
+    if (!fetchRes.ok) {
+      throw new Error('Failed to communicate with happo-cypress server');
+    }
+  } else {
+    // We're not running with `happo-cypress --`. We'll create a report
+    // despite the fact that it might not contain all the snapshots. This is
+    // still helpful when running `cypress open` locally.
+    const { afterSha } = resolveEnvironment();
+    const reportResult = await makeRequest(
+      {
+        url: `${happoConfig.endpoint}/api/async-reports/${afterSha}`,
+        method: 'POST',
+        json: true,
+        body: {
+          requestIds: allRequestIds,
+          project: happoConfig.project,
+        },
+      },
+      { ...happoConfig, maxTries: 3 },
+    );
+    console.log(`[HAPPO] ${reportResult.url}`);
+
+    // Reset the component variants so that we can run the test again while
+    // cypress is still open.
+    knownComponentVariants = {};
+    return null;
+  }
+}
+
 module.exports = {
   happoRegisterSnapshot({
     html,
@@ -142,6 +248,44 @@ module.exports = {
         return;
       }
       allCssBlocks.push(block);
+    });
+    return null;
+  },
+
+  happoRegisterLocalSnapshot({
+    imageId,
+    component,
+    variant: rawVariant,
+    targets,
+    target,
+  }) {
+    if (!happoConfig) {
+      return null;
+    }
+    const variant = dedupeVariant(component, rawVariant);
+    localSnapshotImages[imageId] = { component, variant, targets, target };
+    return null;
+  },
+
+  async handleAfterScreenshot({ name, path, dimensions }) {
+    if (!happoConfig) {
+      return null;
+    }
+    const snapshotData = localSnapshotImages[name];
+    if (!snapshotData) {
+      if (HAPPO_DEBUG) {
+        console.log(`[HAPPO] Ignoring unregistered screenshot: ${name}`);
+      }
+      return;
+    }
+
+    const { component, variant, target } = snapshotData;
+    localSnapshots.push({
+      component,
+      variant,
+      target,
+      url: await uploadImage(path),
+      ...dimensions,
     });
     return null;
   },
@@ -182,6 +326,8 @@ module.exports = {
     snapshots = [];
     allCssBlocks = [];
     snapshotAssetUrls = [];
+    localSnapshots = [];
+    localSnapshotImages = {};
     if (!(HAPPO_CYPRESS_PORT || HAPPO_ENABLED)) {
       console.log(
         `
@@ -202,6 +348,10 @@ Docs:
 
   async happoTeardown() {
     if (!happoConfig) {
+      return null;
+    }
+    if (localSnapshots.length) {
+      await processSnapRequestIds([await uploadLocalSnapshots()]);
       return null;
     }
     if (!snapshots.length) {
@@ -279,42 +429,7 @@ Docs:
       allRequestIds.push(...requestIds);
     }
 
-    if (HAPPO_CYPRESS_PORT) {
-      // We're running with `happo-cypress --`
-      const fetchRes = await nodeFetch(
-        `http://localhost:${HAPPO_CYPRESS_PORT}/`,
-        {
-          method: 'POST',
-          body: allRequestIds.join('\n'),
-        },
-      );
-      if (!fetchRes.ok) {
-        throw new Error('Failed to communicate with happo-cypress server');
-      }
-    } else {
-      // We're not running with `happo-cypress --`. We'll create a report
-      // despite the fact that it might not contain all the snapshots. This is
-      // still helpful when running `cypress open` locally.
-      const { afterSha } = resolveEnvironment();
-      const reportResult = await makeRequest(
-        {
-          url: `${happoConfig.endpoint}/api/async-reports/${afterSha}`,
-          method: 'POST',
-          json: true,
-          body: {
-            requestIds: allRequestIds,
-            project: happoConfig.project,
-          },
-        },
-        { ...happoConfig, maxTries: 3 },
-      );
-      console.log(`[HAPPO] ${reportResult.url}`);
-
-      // Reset the component variants so that we can run the test again while
-      // cypress is still open.
-      knownComponentVariants = {};
-      return null;
-    }
+    await processSnapRequestIds(allRequestIds);
     return null;
   },
 };
