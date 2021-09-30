@@ -29,7 +29,7 @@ import { configure } from '../../';
 
 configure({
   responsiveInlinedCanvases: false,
-  localSnapshots: process.env.HAPPO_USE_LOCAL_SNAPSHOTS === 'true',
+  localSnapshots: Cypress.env().HAPPO_USE_LOCAL_SNAPSHOTS,
 });
 
 Cypress.Commands.add('getIframe', () => {

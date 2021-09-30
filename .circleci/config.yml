@@ -32,6 +32,14 @@ workflows:
           command-prefix: 'HAPPO_PROJECT=download-all HAPPO_DOWNLOAD_ALL=true node bin/happo-cypress.js -- yarn'
 
       - cypress/run:
+          name: cypress-local-snapshots
+          requires:
+            - cypress/install
+          yarn: true
+          start: yarn dev
+          command-prefix: 'CYPRESS_HAPPO_USE_LOCAL_SNAPSHOTS=true node bin/happo-cypress.js -- yarn'
+
+      - cypress/run:
           name: cypress-allow-failures
           requires:
             - cypress/install
