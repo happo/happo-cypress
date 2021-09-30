@@ -8,11 +8,10 @@ jobs:
       name: node/default
     steps:
       - checkout
-      - node/with-cache:
-          steps:
-            - run: yarn install
-            - run: yarn lint
-            - run: ./run-tests.sh
+      - node/install-packages:
+          pkg-manager: yarn
+      - run: yarn lint
+      - run: ./run-tests.sh
 
 workflows:
   build-and-test:
