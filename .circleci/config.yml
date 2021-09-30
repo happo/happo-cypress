@@ -36,7 +36,7 @@ workflows:
             - cypress/install
           yarn: true
           start: yarn dev
-          command-prefix: 'CYPRESS_HAPPO_USE_LOCAL_SNAPSHOTS=true node bin/happo-cypress.js -- yarn'
+          command-prefix: 'CYPRESS_HAPPO_USE_LOCAL_SNAPSHOTS=true HAPPO_PROJECT=local-snapshots node bin/happo-cypress.js -- yarn'
 
       - cypress/run:
           name: cypress-allow-failures
