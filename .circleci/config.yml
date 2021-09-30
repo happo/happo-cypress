@@ -1,18 +1,17 @@
 version: 2.1
 orbs:
-  node: circleci/node@1.1.6
-  cypress: cypress-io/cypress@1.26.0
+  node: circleci/node@4.7.0
+  cypress: cypress-io/cypress@1.29.0
 jobs:
   build-and-test:
     executor:
       name: node/default
     steps:
       - checkout
-      - node/with-cache:
-          steps:
-            - run: yarn install
-            - run: yarn lint
-            - run: ./run-tests.sh
+      - node/install-packages:
+          pkg-manager: yarn
+      - run: yarn lint
+      - run: ./run-tests.sh
 
 workflows:
   build-and-test:
@@ -30,6 +29,14 @@ workflows:
           yarn: true
           start: yarn dev
           command-prefix: 'HAPPO_PROJECT=download-all HAPPO_DOWNLOAD_ALL=true node bin/happo-cypress.js -- yarn'
+
+      - cypress/run:
+          name: cypress-local-snapshots
+          requires:
+            - cypress/install
+          yarn: true
+          start: yarn dev
+          command-prefix: 'CYPRESS_HAPPO_USE_LOCAL_SNAPSHOTS=true HAPPO_PROJECT=local-snapshots node bin/happo-cypress.js -- yarn'
 
       - cypress/run:
           name: cypress-allow-failures
