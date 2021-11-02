@@ -60,7 +60,9 @@ function resolveLink(env) {
     if (ghEvent.pull_request) {
       return ghEvent.pull_request.html_url;
     }
-    return ghEvent.head_commit.url;
+    if (ghEvent.head_commit) {
+      return ghEvent.head_commit.url;
+    }
   }
 
   const githubBase = HAPPO_GITHUB_BASE || GITHUB_BASE || 'https://github.com';
