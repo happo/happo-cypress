@@ -50,6 +50,7 @@ function testCircleCIEnv() {
 
 function testGithubActionsEnvironment() {
   const githubEnv = {
+    GITHUB_SHA: 'ccddffddccffdd',
     GITHUB_EVENT_PATH: path.resolve(
       __dirname,
       'github_pull_request_event.json',
@@ -72,6 +73,20 @@ function testGithubActionsEnvironment() {
   assert.equal(
     result.link,
     'https://github.com/foo/bar/commit/0000000000000000000000000000000000000000',
+  );
+  assert.ok(result.message !== undefined);
+
+  // Try with a workflow_dispatch event
+  githubEnv.GITHUB_EVENT_PATH = path.resolve(
+    __dirname,
+    'github_workflow_dispatch.json',
+  );
+  result = resolveEnvironment(githubEnv);
+  assert.equal(result.beforeSha, undefined);
+  assert.equal(result.afterSha, 'ccddffddccffdd');
+  assert.equal(
+    result.link,
+    'https://github.com/octo-org/octo-repo/commit/ccddffddccffdd',
   );
   assert.ok(result.message !== undefined);
 }

@@ -40,6 +40,7 @@ function resolveLink(env) {
     CIRCLE_PROJECT_REPONAME,
     CIRCLE_SHA1,
     GITHUB_EVENT_PATH,
+    GITHUB_SHA,
   } = env;
 
   if (HAPPO_CHANGE_URL) {
@@ -62,6 +63,9 @@ function resolveLink(env) {
     }
     if (ghEvent.head_commit) {
       return ghEvent.head_commit.url;
+    }
+    if (GITHUB_SHA && ghEvent.repository) {
+      return `${ghEvent.repository.html_url}/commit/${GITHUB_SHA}`;
     }
   }
 
@@ -161,6 +165,7 @@ function resolveAfterSha(env) {
     TRAVIS_PULL_REQUEST_SHA,
     TRAVIS_COMMIT,
     GITHUB_EVENT_PATH,
+    GITHUB_SHA,
   } = env;
   const sha =
     HAPPO_CURRENT_SHA ||
@@ -176,7 +181,7 @@ function resolveAfterSha(env) {
     if (ghEvent.pull_request) {
       return ghEvent.pull_request.head.sha;
     }
-    return ghEvent.after;
+    return ghEvent.after || GITHUB_SHA;
   }
   return `dev-${crypto.randomBytes(4).toString('hex')}`;
 }
