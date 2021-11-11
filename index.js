@@ -11,7 +11,6 @@ function getBaseUrlWithPath(doc) {
 }
 
 before(() => {
-  cy.task('happoInit');
   cy.on('window:load', window => {
     const styleElements = window.document.querySelectorAll(
       CSS_ELEMENTS_SELECTOR,
@@ -21,10 +20,6 @@ before(() => {
       element.baseUrl = baseUrl;
     }
   });
-});
-
-after(() => {
-  cy.task('happoTeardown');
 });
 
 const COMMENT_PATTERN = /^\/\*.+\*\/$/;
@@ -275,6 +270,7 @@ Cypress.Commands.add(
     const assetUrls = getSubjectAssetUrls(subject, doc);
     const cssBlocks = extractCSSBlocks({ doc });
     cy.task('happoRegisterSnapshot', {
+      timestamp: Date.now(),
       html,
       cssBlocks,
       assetUrls,
