@@ -225,6 +225,13 @@ async function processSnapRequestIds(allRequestIds) {
 }
 
 function removeSnapshotsMadeBetween({ start, end }) {
+  if (HAPPO_DEBUG) {
+    console.log(
+      `[HAPPO] Removing snapshots made between ${new Date(
+        start,
+      )} and ${new Date(end)}`,
+    );
+  }
   snapshots = snapshots.filter(({ timestamp }) => {
     if (!timestamp) {
       return true;
@@ -244,6 +251,9 @@ const task = {
   async handleAfterSpec(spec, results) {
     if (!happoConfig) {
       return;
+    }
+    if (HAPPO_DEBUG) {
+      console.log('[HAPPO] Running after:spec hook');
     }
     for (const test of results.tests) {
       const wasRetried =
@@ -391,6 +401,9 @@ Docs:
       );
       return null;
     }
+    if (HAPPO_DEBUG) {
+      console.log('[HAPPO] Running happoInit');
+    }
     happoConfig = await loadHappoConfig();
     if (happoConfig && !task.isRegisteredCorrectly) {
       throw new Error(`happo-cypress hasn't been registered correctly. Make sure you call \`happoTask.register\` when you register the plugin:
@@ -408,6 +421,9 @@ Docs:
   async happoTeardown() {
     if (!happoConfig) {
       return null;
+    }
+    if (HAPPO_DEBUG) {
+      console.log('[HAPPO] Running happoTeardown');
     }
     if (localSnapshots.length) {
       await processSnapRequestIds([await uploadLocalSnapshots()]);
