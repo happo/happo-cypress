@@ -81,6 +81,12 @@ function dedupeVariant(component, variant) {
   return `${variant}-${comp[variant]}`;
 }
 
+function dedupeSnapshots() {
+  for (const snapshot of snapshots) {
+    snapshot.variant = dedupeVariant(snapshot.component, snapshot.variant);
+  }
+}
+
 function handleDynamicTargets(targets) {
   const result = [];
   if (typeof targets === 'undefined') {
@@ -218,13 +224,56 @@ async function processSnapRequestIds(allRequestIds) {
   }
 }
 
-module.exports = {
+function removeSnapshotsMadeBetween({ start, end }) {
+  snapshots = snapshots.filter(({ timestamp }) => {
+    if (!timestamp) {
+      return true;
+    }
+    return timestamp < start || timestamp > end;
+  });
+}
+
+const task = {
+  register(on) {
+    on('task', task);
+    on('after:screenshot', task.handleAfterScreenshot);
+    on('after:spec', task.handleAfterSpec);
+    task.isRegisteredCorrectly = true;
+  },
+
+  async handleAfterSpec(spec, results) {
+    if (!happoConfig) {
+      return;
+    }
+    for (const test of results.tests) {
+      const wasRetried =
+        test.attempts.some(t => t.state === 'failed') &&
+        test.attempts[test.attempts.length - 1].state === 'passed';
+      if (!wasRetried) {
+        return;
+      }
+      for (const attempt of test.attempts) {
+        if (attempt.state === 'failed') {
+          const start = new Date(attempt.wallClockStartedAt).getTime();
+          removeSnapshotsMadeBetween({
+            start,
+            end: start + attempt.wallClockDuration,
+          });
+        }
+      }
+    }
+
+    await task.happoTeardown();
+    return null;
+  },
+
   happoRegisterSnapshot({
+    timestamp,
     html,
     assetUrls,
     cssBlocks,
     component,
-    variant: rawVariant,
+    variant,
     targets: rawTargets,
     htmlElementAttrs,
     bodyElementAttrs,
@@ -232,10 +281,10 @@ module.exports = {
     if (!happoConfig) {
       return null;
     }
-    const variant = dedupeVariant(component, rawVariant);
     snapshotAssetUrls.push(...assetUrls);
     const targets = handleDynamicTargets(rawTargets);
     snapshots.push({
+      timestamp,
       html,
       component,
       variant,
@@ -343,6 +392,16 @@ Docs:
       return null;
     }
     happoConfig = await loadHappoConfig();
+    if (happoConfig && !task.isRegisteredCorrectly) {
+      throw new Error(`happo-cypress hasn't been registered correctly. Make sure you call \`happoTask.register\` when you register the plugin:
+
+  const happoTask = require('happo-cypress/task');
+
+  module.exports = (on) => {
+    happoTask.register(on);
+  };
+      `);
+    }
     return null;
   },
 
@@ -357,6 +416,7 @@ Docs:
     if (!snapshots.length) {
       return null;
     }
+    dedupeSnapshots();
     await downloadCSSContent(allCssBlocks);
     const allUrls = [...snapshotAssetUrls];
     allCssBlocks.forEach(block => {
@@ -433,3 +493,5 @@ Docs:
     return null;
   },
 };
+
+module.exports = task;

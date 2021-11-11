@@ -23,10 +23,6 @@ before(() => {
   });
 });
 
-after(() => {
-  cy.task('happoTeardown');
-});
-
 const COMMENT_PATTERN = /^\/\*.+\*\/$/;
 
 let config = {
@@ -275,6 +271,7 @@ Cypress.Commands.add(
     const assetUrls = getSubjectAssetUrls(subject, doc);
     const cssBlocks = extractCSSBlocks({ doc });
     cy.task('happoRegisterSnapshot', {
+      timestamp: Date.now(),
       html,
       cssBlocks,
       assetUrls,
