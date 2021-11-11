@@ -11,7 +11,6 @@ function getBaseUrlWithPath(doc) {
 }
 
 before(() => {
-  cy.task('happoInit');
   cy.on('window:load', window => {
     const styleElements = window.document.querySelectorAll(
       CSS_ELEMENTS_SELECTOR,

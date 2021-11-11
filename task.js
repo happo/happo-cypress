@@ -245,6 +245,7 @@ const task = {
     on('task', task);
     on('after:screenshot', task.handleAfterScreenshot);
     on('after:spec', task.handleAfterSpec);
+    on('before:spec', task.happoInit);
     task.isRegisteredCorrectly = true;
   },
 
@@ -260,7 +261,7 @@ const task = {
         test.attempts.some(t => t.state === 'failed') &&
         test.attempts[test.attempts.length - 1].state === 'passed';
       if (!wasRetried) {
-        return;
+        continue;
       }
       for (const attempt of test.attempts) {
         if (attempt.state === 'failed') {
