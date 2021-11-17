@@ -21,7 +21,7 @@ jobs:
         uses: cypress-io/github-action@v2
         with:
           start: yarn dev
-          command-prefix: node bin/happo-cypress.js -- yarn
+          command-prefix: yarn happo-e2e -- -- yarn
         env:
           HAPPO_API_KEY: ${{ secrets.HAPPO_API_KEY }}
           HAPPO_API_SECRET: ${{ secrets.HAPPO_API_SECRET }}

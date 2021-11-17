@@ -13,7 +13,8 @@
     "dev": "next --port 7654",
     "build": "next build",
     "lint": "eslint .",
-    "start": "next start"
+    "start": "next start",
+    "happo-e2e": "happo-e2e"
   },
   "devDependencies": {
     "cypress": "^8.5.0",
@@ -24,13 +25,6 @@
     "react-dom": "^16.13.1"
   },
   "dependencies": {
-    "archiver": "^3.1.1",
-    "base64-stream": "^1.0.0",
-    "crypto-js": "^4.0.0",
-    "https-proxy-agent": "^5.0.0",
-    "mkdirp": "^1.0.4",
-    "node-fetch": "^2.6.0",
-    "parse-srcset": "^1.0.2",
-    "string.prototype.replaceall": "^1.0.3"
+    "happo-e2e": "next"
   }
 }

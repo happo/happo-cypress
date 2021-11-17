@@ -1,28 +1,9 @@
-const chunked = require('./src/chunked.js');
-const md5 = require('crypto-js/md5');
-const parseSrcset = require('parse-srcset');
-
-const findCSSAssetUrls = require('./src/findCSSAssetUrls');
-
-const CSS_ELEMENTS_SELECTOR = 'style,link[rel="stylesheet"][href]';
-
-function getBaseUrlWithPath(doc) {
-  return doc.location.href.slice(0, doc.location.href.lastIndexOf('/') + 1);
-}
+const chunked = require('./src/chunked');
+const takeDOMSnapshot = require('happo-e2e/takeDOMSnapshot');
 
 before(() => {
-  cy.on('window:load', window => {
-    const styleElements = window.document.querySelectorAll(
-      CSS_ELEMENTS_SELECTOR,
-    );
-    const baseUrl = getBaseUrlWithPath(window.document);
-    for (const element of styleElements) {
-      element.baseUrl = baseUrl;
-    }
-  });
+  cy.on('window:load', takeDOMSnapshot.init);
 });
-
-const COMMENT_PATTERN = /^\/\*.+\*\/$/;
 
 let config = {
   responsiveInlinedCanvases: false,
@@ -34,184 +15,6 @@ module.exports = {
     config = { ...config, ...(userConfig || {}) };
   },
 };
-
-function extractCSSBlocks({ doc }) {
-  const blocks = [];
-  const styleElements = doc.querySelectorAll(CSS_ELEMENTS_SELECTOR);
-  const baseUrl = getBaseUrlWithPath(doc);
-
-  styleElements.forEach(element => {
-    if (element.tagName === 'LINK') {
-      // <link href>
-      const href = element.getAttribute('href');
-      blocks.push({ key: href, href, baseUrl: element.baseUrl || baseUrl });
-    } else {
-      // <style>
-      const lines = Array.from(element.sheet.cssRules).map(r => r.cssText);
-
-      // Filter out those lines that are comments (these are often source
-      // mappings)
-      const content = lines
-        .filter(line => !COMMENT_PATTERN.test(line))
-        .join('\n');
-
-      // Create a hash so that we can dedupe equal styles
-      const key = md5(content).toString();
-      blocks.push({ content, key, baseUrl: element.baseUrl || baseUrl });
-    }
-  });
-  return blocks;
-}
-
-function getSubjectAssetUrls(subject, doc) {
-  const allUrls = [];
-  const allElements = [subject].concat(
-    Array.from(subject.querySelectorAll('*')),
-  );
-  const baseUrl = getBaseUrlWithPath(doc);
-  allElements.forEach(element => {
-    if (element.tagName === 'SCRIPT') {
-      // skip script elements
-      return;
-    }
-    const srcset = element.getAttribute('srcset');
-    const src = element.getAttribute('src');
-    const style = element.getAttribute('style');
-    const base64Url = element._base64Url;
-    if (base64Url) {
-      const rawBase64 = base64Url.replace(/^data:image\/png;base64,/, '');
-      const chunks = chunked(rawBase64, config.canvasChunkSize);
-      for (let i = 0; i < chunks.length; i++) {
-        const base64Chunk = chunks[i];
-        const isFirst = i === 0;
-        const isLast = i === chunks.length - 1;
-        cy.task('happoRegisterBase64Image', {
-          base64Chunk,
-          src,
-          isFirst,
-          isLast,
-        });
-      }
-    }
-    if (src) {
-      allUrls.push({ url: src, baseUrl });
-    }
-    if (srcset) {
-      allUrls.push(...parseSrcset(srcset).map(p => ({ url: p.url, baseUrl })));
-    }
-    if (style) {
-      allUrls.push(...findCSSAssetUrls(style).map(url => ({ url, baseUrl })));
-    }
-  });
-  return allUrls.filter(({ url }) => !url.startsWith('data:'));
-}
-
-function inlineCanvases(doc, subject, options) {
-  const canvases = [];
-  if (subject.tagName === 'CANVAS') {
-    canvases.push(subject);
-  }
-  canvases.push(...Array.from(subject.querySelectorAll('canvas')));
-
-  const responsive =
-    typeof options.responsiveInlinedCanvases === 'boolean'
-      ? options.responsiveInlinedCanvases
-      : config.responsiveInlinedCanvases;
-
-  let newSubject = subject;
-  const replacements = [];
-  for (const canvas of canvases) {
-    try {
-      const canvasImageBase64 = canvas.toDataURL('image/png');
-      if (canvasImageBase64 === 'data:,') {
-        continue;
-      }
-      const image = doc.createElement('img');
-
-      const url = `/.happo-tmp/_inlined/${md5(
-        canvasImageBase64,
-      ).toString()}.png`;
-      image.src = url;
-      image._base64Url = canvasImageBase64;
-      const style = canvas.getAttribute('style');
-      if (style) {
-        image.setAttribute('style', style);
-      }
-      const className = canvas.getAttribute('class');
-      if (className) {
-        image.setAttribute('class', className);
-      }
-      if (responsive) {
-        image.style.width = '100%';
-        image.style.height = 'auto';
-      } else {
-        const width = canvas.getAttribute('width');
-        const height = canvas.getAttribute('height');
-        image.setAttribute('width', width);
-        image.setAttribute('height', height);
-      }
-      canvas.replaceWith(image);
-      if (canvas === subject) {
-        // We're inlining the subject (the `cy.get('canvas')` element). Make sure
-        // we return the modified subject.
-        newSubject = image;
-      }
-      replacements.push({ from: canvas, to: image });
-    } catch (e) {
-      if (e.name === 'SecurityError') {
-        console.warn('[HAPPO] Failed to convert tainted canvas to PNG image');
-        console.warn(e);
-      } else {
-        throw e;
-      }
-    }
-  }
-
-  function cleanup() {
-    for (const { from, to } of replacements) {
-      to.replaceWith(from);
-    }
-  }
-  return { subject: newSubject, cleanup };
-}
-
-function transformDOM({ doc, selector, transform, subject }) {
-  const elements = Array.from(subject.querySelectorAll(selector));
-  if (!elements.length) {
-    return;
-  }
-  const replacements = [];
-  for (const element of elements) {
-    const replacement = transform(element, doc);
-    replacements.push({ from: element, to: replacement });
-    element.replaceWith(replacement);
-  }
-  return () => {
-    for (const { from, to } of replacements) {
-      to.replaceWith(from);
-    }
-  };
-}
-
-function registerScrollPositions(doc) {
-  const elements = doc.body.querySelectorAll('*');
-  for (const node of elements) {
-    if (node.scrollTop !== 0 || node.scrollLeft !== 0) {
-      node.setAttribute(
-        'data-happo-scrollposition',
-        `${node.scrollTop},${node.scrollLeft}`,
-      );
-    }
-  }
-}
-
-function extractAttributes(el) {
-  const result = {};
-  [...el.attributes].forEach(item => {
-    result[item.name] = item.value;
-  });
-  return result;
-}
 
 function resolveTargetName() {
   const { viewportHeight, viewportWidth } = Cypress.config();
@@ -227,9 +30,7 @@ function takeLocalSnapshot({ originalSubject, component, variant, options }) {
     targets: options.targets,
     target: resolveTargetName(),
   });
-  cy.wrap(originalSubject, { log: false })
-    .first()
-    .screenshot(imageId, options);
+  cy.wrap(originalSubject, { log: false }).first().screenshot(imageId, options);
 }
 
 Cypress.Commands.add(
@@ -247,45 +48,44 @@ Cypress.Commands.add(
         options,
       });
     }
+
     const doc = originalSubject[0].ownerDocument;
-    const { subject, cleanup: canvasCleanup } = inlineCanvases(
+
+    const responsiveInlinedCanvases =
+      typeof options.responsiveInlinedCanvases === 'boolean'
+        ? options.responsiveInlinedCanvases
+        : config.responsiveInlinedCanvases;
+
+
+    const domSnapshot = takeDOMSnapshot({
       doc,
-      originalSubject[0],
-      options,
-    );
-    registerScrollPositions(doc);
-
-    const transformCleanup = options.transformDOM
-      ? transformDOM({
-          doc,
-          subject,
-          ...options.transformDOM,
-        })
-      : undefined;
-
-    subject.querySelectorAll('script').forEach(scriptEl => {
-      scriptEl.parentNode.removeChild(scriptEl);
+      element: originalSubject[0],
+      responsiveInlinedCanvases,
+      transformDOM: options.transformDOM,
+      handleBase64Image: ({ src, base64Url }) => {
+        const rawBase64 = base64Url.replace(/^data:image\/png;base64,/, '');
+        const chunks = chunked(rawBase64, config.canvasChunkSize);
+        for (let i = 0; i < chunks.length; i++) {
+          const base64Chunk = chunks[i];
+          const isFirst = i === 0;
+          const isLast = i === chunks.length - 1;
+          cy.task('happoRegisterBase64Image', {
+            base64Chunk,
+            src,
+            isFirst,
+            isLast,
+          });
+        }
+      }
     });
-    const html = subject.outerHTML;
-    const assetUrls = getSubjectAssetUrls(subject, doc);
-    const cssBlocks = extractCSSBlocks({ doc });
+
     cy.task('happoRegisterSnapshot', {
       timestamp: Date.now(),
-      html,
-      cssBlocks,
-      assetUrls,
       component,
       variant,
-      htmlElementAttrs: extractAttributes(
-        subject.ownerDocument.documentElement,
-      ),
-      bodyElementAttrs: extractAttributes(subject.ownerDocument.body),
       targets: options.targets,
+      ...domSnapshot,
     });
-    if (transformCleanup) {
-      transformCleanup();
-    }
-    canvasCleanup();
   },
 );
 
