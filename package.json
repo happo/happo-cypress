@@ -25,6 +25,6 @@
     "react-dom": "^16.13.1"
   },
   "dependencies": {
-    "happo-e2e": "next"
+    "happo-e2e": "^1.0.0"
   }
 }
