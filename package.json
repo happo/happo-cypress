@@ -14,7 +14,7 @@
     "build": "next build",
     "lint": "eslint .",
     "start": "next start",
-    "happo-e2e": "happo-e2e"
+    "happo-e2e": "export $(grep -v '^#' .env | xargs) && happo-e2e"
   },
   "devDependencies": {
     "cypress": "^8.5.0",
