@@ -1,4 +1,8 @@
 import React, { useEffect, useRef } from 'react';
+import NextImage from 'next/image';
+
+import hotelImage from '../public/hotel.jpg';
+import svgImage from '../public/golf-logo.svg';
 
 function CanvasImage({ responsive }) {
   const ref = useRef();
@@ -92,10 +96,7 @@ export default function IndexPage() {
         <h3>Hello</h3>
         <p>
           Created <span>5 days ago</span> by Tom Dooner. Updated
-          <i>
-            13 minutes ago
-          </i>
-          .
+          <i>13 minutes ago</i>.
         </p>
         <p>
           The time is now <span>2:54pm</span>. One minute ago was <i>2:53 PM</i>
@@ -122,6 +123,8 @@ export default function IndexPage() {
           style={{ marginBottom: 20, fontSize: '40px' }}
         />
         <img src="/hotel.jpg" />
+        <NextImage src={hotelImage} />
+        <NextImage src={svgImage} />
         <CanvasImage responsive />
         <div className="responsive-canvas-wrapper" style={{ width: 400 }}>
           <CanvasImage />
@@ -139,10 +142,7 @@ export default function IndexPage() {
           className="image"
           src="http://localhost:7654/storyhotel-small.jpg?foobar=ignore"
         />
-        <img
-          className="image"
-          src="./storyhotel-small.jpg"
-        />
+        <img className="image" src="./storyhotel-small.jpg" />
         <div
           className="image"
           style={{

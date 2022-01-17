@@ -2,6 +2,8 @@ describe('The Home Page', () => {
   it('successfully loads', () => {
     cy.visit('/');
     cy.wait(100);
+    cy.scrollTo('bottom', { duration: 100 });
+    cy.scrollTo('top');
 
     cy.happoHideDynamicElements({ selectors: ['.hide-me'] });
 
