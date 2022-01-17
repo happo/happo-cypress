@@ -6,6 +6,7 @@ jobs:
   build-and-test:
     executor:
       name: node/default
+      tag: '16.13.2'
     steps:
       - checkout
       - node/install-packages:
