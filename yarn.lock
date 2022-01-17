@@ -1367,10 +1367,10 @@ graceful-fs@^4.1.6, graceful-fs@^4.2.0:
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.2.8.tgz#e412b8d33f5e006593cbd3cee6df9f2cebbe802a"
   integrity sha512-qkIilPUYcNhJpd33n0GBXTB1MMPp14TxEsEs0pTrsSVucApsYzW5V+Q8Qxhik6KU3evy+qkAAowTByymK0avdg==
 
-happo-e2e@^1.0.2:
-  version "1.0.2"
-  resolved "https://registry.yarnpkg.com/happo-e2e/-/happo-e2e-1.0.2.tgz#a0888b95fccdbcaaaa2e182bf923f269fe947c0f"
-  integrity sha512-LRGg1uSmc9LueIxH7ovVpPKxLSGDkPDsuYeGh4Hwy6ZisGRLVh4ZbBcuxazrXqVKhRaYlyIKpQc+dgWiHySvAQ==
+happo-e2e@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/happo-e2e/-/happo-e2e-1.0.3.tgz#4f8c2a28d078344f446938f2c271d4d6baab6de0"
+  integrity sha512-cfA3wPYrpW3xXjGxKRydw4diuqgHgdsJlqrVzpxAXT/553RIK40w+cPkNxx+yO/rSvU4Ttp5NccM7XKPryVoiA==
   dependencies:
     archiver "^5.3.0"
     base64-stream "^1.0.0"
