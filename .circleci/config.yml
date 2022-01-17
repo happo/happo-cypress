@@ -20,9 +20,11 @@ workflows:
   cypress:
     jobs:
       - cypress/install:
+          executor: cypress/base-14
           yarn: true
 
       - cypress/run:
+          executor: cypress/base-14
           name: cypress-download-all
           requires:
             - cypress/install
@@ -31,6 +33,7 @@ workflows:
           command-prefix: 'HAPPO_PROJECT=download-all HAPPO_DOWNLOAD_ALL=true yarn happo-e2e -- -- yarn'
 
       - cypress/run:
+          executor: cypress/base-14
           name: cypress-local-snapshots
           requires:
             - cypress/install
@@ -39,6 +42,7 @@ workflows:
           command-prefix: 'CYPRESS_HAPPO_USE_LOCAL_SNAPSHOTS=true HAPPO_PROJECT=local-snapshots yarn happo-e2e -- -- yarn'
 
       - cypress/run:
+          executor: cypress/base-14
           name: cypress-allow-failures
           requires:
             - cypress/install
@@ -47,6 +51,7 @@ workflows:
           command-prefix: 'CYPRESS_INTRODUCE_FAILING_ASSERTION=true HAPPO_PROJECT=allow-failures yarn happo-e2e -- --allow-failures -- yarn'
 
       - cypress/run:
+          executor: cypress/base-14
           name: cypress-parallel
           requires:
             - cypress/install
@@ -60,6 +65,7 @@ workflows:
             - run: 'HAPPO_PROJECT=parallel HAPPO_NONCE=${CIRCLE_WORKFLOW_ID} yarn happo-e2e -- finalize'
 
       - cypress/run:
+          executor: cypress/base-14
           name: cypress-parallel-allow-failures
           requires:
             - cypress/install
