@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import NextImage from 'next/image';
 
 import hotelImage from '../public/hotel.jpg';
+import svgImage from '../public/golf-logo.svg';
 
 function CanvasImage({ responsive }) {
   const ref = useRef();
@@ -123,6 +124,7 @@ export default function IndexPage() {
         />
         <img src="/hotel.jpg" />
         <NextImage src={hotelImage} />
+        <NextImage src={svgImage} />
         <CanvasImage responsive />
         <div className="responsive-canvas-wrapper" style={{ width: 400 }}>
           <CanvasImage />
