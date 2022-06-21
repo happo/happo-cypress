@@ -1,11 +1,11 @@
 version: 2.1
 orbs:
-  node: circleci/node@4.7.0
-  cypress: cypress-io/cypress@1.29.0
+  node: circleci/node@5.0.2
+  cypress: cypress-io/cypress@2.0.0
 executors:
   node-16:
     docker:
-      - image: 'cypress/base:16.13.0'
+      - image: 'cypress/base:16.14.2'
 jobs:
   build-and-test:
     executor:
