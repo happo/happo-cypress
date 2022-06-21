@@ -18,7 +18,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Run cypress
-        uses: cypress-io/github-action@v2
+        uses: cypress-io/github-action@v4
         with:
           start: yarn dev
           command-prefix: yarn happo-e2e -- -- yarn
