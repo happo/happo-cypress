@@ -1365,15 +1365,16 @@ graceful-fs@^4.1.6, graceful-fs@^4.2.0:
   resolved "https://registry.yarnpkg.com/graceful-fs/-/graceful-fs-4.2.8.tgz#e412b8d33f5e006593cbd3cee6df9f2cebbe802a"
   integrity sha512-qkIilPUYcNhJpd33n0GBXTB1MMPp14TxEsEs0pTrsSVucApsYzW5V+Q8Qxhik6KU3evy+qkAAowTByymK0avdg==
 
-happo-e2e@^1.0.3:
-  version "1.0.3"
-  resolved "https://registry.yarnpkg.com/happo-e2e/-/happo-e2e-1.0.3.tgz#4f8c2a28d078344f446938f2c271d4d6baab6de0"
-  integrity sha512-cfA3wPYrpW3xXjGxKRydw4diuqgHgdsJlqrVzpxAXT/553RIK40w+cPkNxx+yO/rSvU4Ttp5NccM7XKPryVoiA==
+happo-e2e@1.4.2-rc.1:
+  version "1.4.2-rc.1"
+  resolved "https://registry.yarnpkg.com/happo-e2e/-/happo-e2e-1.4.2-rc.1.tgz#9e3128ee3b3a71e997750b7b374e674198264043"
+  integrity sha512-afbNFpaJI5a7By9ww4C83+M1pCBT5OY9Wr4GDgetodQV+1+ek+R0cehEseHNHBIeHp5qPa4LQktZbfYLexUbkw==
   dependencies:
     archiver "^5.3.0"
     base64-stream "^1.0.0"
     crypto-js "^4.1.1"
     https-proxy-agent "^5.0.0"
+    image-size "^1.0.1"
     mkdirp "^1.0.4"
     node-fetch "^2.0.0"
     parse-srcset "^1.0.2"
@@ -1515,6 +1516,13 @@ ignore@^4.0.6:
   version "4.0.6"
   resolved "https://registry.yarnpkg.com/ignore/-/ignore-4.0.6.tgz#750e3db5862087b4737ebac8207ffd1ef27b25fc"
   integrity sha512-cyFDKrqc/YdcWFniJhzI42+AzS+gNwmUzOSFcRCQYwySuBBBy/KjuxWLZ/FHEH6Moq1NizMOBWyTcv8O4OZIMg==
+
+image-size@^1.0.1:
+  version "1.0.2"
+  resolved "https://registry.yarnpkg.com/image-size/-/image-size-1.0.2.tgz#d778b6d0ab75b2737c1556dd631652eb963bc486"
+  integrity sha512-xfOoWjceHntRb3qFCrh5ZFORYH8XCdYpASltMhZ/Q0KZiOwjdE/Yl2QCiWdwD+lygV5bMCvauzgu5PxBX/Yerg==
+  dependencies:
+    queue "6.0.2"
 
 imagetracerjs@^1.2.5:
   version "1.2.6"
@@ -2355,6 +2363,13 @@ qs@~6.5.2:
   version "6.5.2"
   resolved "https://registry.yarnpkg.com/qs/-/qs-6.5.2.tgz#cb3ae806e8740444584ef154ce8ee98d403f3e36"
   integrity sha512-N5ZAX4/LxJmF+7wN74pUD6qAh9/wnvdQcjq9TZjevvXzSUo7bfmw91saqMjzGS2xq91/odN2dW/WOl7qQHNDGA==
+
+queue@6.0.2:
+  version "6.0.2"
+  resolved "https://registry.yarnpkg.com/queue/-/queue-6.0.2.tgz#b91525283e2315c7553d2efa18d83e76432fed65"
+  integrity sha512-iHZWu+q3IdFZFX36ro/lKBkSvfkztY5Y7HMiPlOUjhupPcG2JMfst2KKEpu5XndviX/3UhFbRngUPNKtgvtZiA==
+  dependencies:
+    inherits "~2.0.3"
 
 react-dom@^17.0.2:
   version "17.0.2"
