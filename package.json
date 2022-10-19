@@ -22,9 +22,10 @@
     "happo.io": "^6.4.0",
     "next": "^12.0.8",
     "react": "^17.0.2",
-    "react-dom": "^17.0.2"
+    "react-dom": "^17.0.2",
+    "happo-e2e": "^1.4.2"
   },
-  "dependencies": {
-    "happo-e2e": "1.4.2-rc.1"
+  "peerDependencies": {
+    "happo-e2e": "^1.4.2"
   }
 }
