@@ -26,6 +26,6 @@
     "happo-e2e": "^1.4.2"
   },
   "peerDependencies": {
-    "happo-e2e": "^1.4.2"
+    "happo-e2e": ">= 1.4.2"
   }
 }
