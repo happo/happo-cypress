@@ -56,10 +56,11 @@ Cypress.Commands.add(
         ? options.responsiveInlinedCanvases
         : config.responsiveInlinedCanvases;
 
-
     const domSnapshot = takeDOMSnapshot({
       doc,
-      element: originalSubject[0],
+      element: options.includeAllElements
+        ? originalSubject
+        : originalSubject[0],
       responsiveInlinedCanvases,
       transformDOM: options.transformDOM,
       handleBase64Image: ({ src, base64Url }) => {
@@ -76,7 +77,7 @@ Cypress.Commands.add(
             isLast,
           });
         }
-      }
+      },
     });
 
     cy.task('happoRegisterSnapshot', {

@@ -33,6 +33,10 @@ describe('The Home Page', () => {
       },
     });
     cy.get('.card').happoScreenshot({ component: 'Card' });
+    cy.get('.card,.button').happoScreenshot({
+      includeAllElements: true,
+      component: 'Card + Button',
+    });
 
     cy.happoHideDynamicElements({ selectors: ['.hide-me'] });
     cy.get('.dynamic-text').happoScreenshot({
