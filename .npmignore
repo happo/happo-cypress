@@ -4,3 +4,11 @@ test
 public
 cypress.json
 .next
+happo-cypress*.tgz
+.circleci
+.github
+.importjs.js
+.happo.js
+.happo-tmp
+cypress.config.js
+.eslintrc.js
