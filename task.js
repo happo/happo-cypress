@@ -1,7 +1,6 @@
 const Controller = require('happo-e2e/controller');
 
 const controller = new Controller();
-
 const localSnapshotImages = {};
 
 const { HAPPO_DEBUG } = process.env;
