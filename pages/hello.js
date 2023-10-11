@@ -11,7 +11,7 @@ export default function InitialHelloPage() {
 
   return (
     <div>
-      <Link href="/subfolder/hello"><a>Click me</a></Link>
+      <Link href="/subfolder/hello"><a>Clicka the me-a</a></Link>
     </div>
   );
 }
