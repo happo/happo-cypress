@@ -86,6 +86,10 @@ const task = {
       return null;
     }
 
+    if (!name) {
+      return null;
+    }
+
     const snapshotData = localSnapshotImages[name];
     if (!snapshotData) {
       if (HAPPO_DEBUG) {
