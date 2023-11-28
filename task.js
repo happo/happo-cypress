@@ -6,6 +6,31 @@ const localSnapshotImages = {};
 
 const { HAPPO_DEBUG } = process.env;
 
+function getCleanupTimeframe({ attempt, results }) {
+  if (attempt.wallClockStartedAt && attempt.wallClockDuration) {
+    // Cypress <= v12
+    const start = new Date(attempt.wallClockStartedAt).getTime();
+    return { start, end: start + attempt.wallClockDuration };
+  }
+
+  // Cypress >= 13
+  const errorScreenshot = results.screenshots.find(
+    s => /\(failed\)/.test(s.path) && !s.name,
+  );
+  if (!errorScreenshot || !results.stats) {
+    if (HAPPO_DEBUG) {
+      console.log(
+        `[HAPPO] Couldn't find start and end time for failed attempt. This could lead to duplicate screenshots in your Happo reports.`,
+      );
+    }
+    return { start: 0, end: 0 };
+  }
+
+  const start = new Date(results.stats.startedAt).getTime();
+  const end = new Date(errorScreenshot.takenAt).getTime();
+  return { start, end };
+}
+
 const task = {
   register(on) {
     on('task', task);
@@ -29,10 +54,10 @@ const task = {
         }
         for (const attempt of test.attempts) {
           if (attempt.state === 'failed') {
-            const start = new Date(attempt.wallClockStartedAt).getTime();
+            const { start, end } = getCleanupTimeframe({ attempt, results });
             controller.removeSnapshotsMadeBetween({
               start,
-              end: start + attempt.wallClockDuration,
+              end,
             });
           }
         }
@@ -58,6 +83,10 @@ const task = {
 
   async handleAfterScreenshot({ name, path, dimensions }) {
     if (!controller.isActive()) {
+      return null;
+    }
+
+    if (!name) {
       return null;
     }
 
