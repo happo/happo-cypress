@@ -1,6 +1,6 @@
 {
   "name": "happo-cypress",
-  "version": "4.1.2",
+  "version": "4.1.3",
   "description": "A Happo integration with Cypress.io",
   "main": "index.js",
   "repository": "git@github.com:happo/happo-cypress.git",
