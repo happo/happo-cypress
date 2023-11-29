@@ -14,10 +14,7 @@ function getCleanupTimeframe({ attempt, results }) {
   }
 
   // Cypress >= 13
-  const errorScreenshot = results.screenshots.find(
-    s => /\(failed\)/.test(s.path) && !s.name,
-  );
-  if (!errorScreenshot || !results.stats) {
+  if (!results.stats) {
     if (HAPPO_DEBUG) {
       console.log(
         `[HAPPO] Couldn't find start and end time for failed attempt. This could lead to duplicate screenshots in your Happo reports.`,
@@ -27,7 +24,7 @@ function getCleanupTimeframe({ attempt, results }) {
   }
 
   const start = new Date(results.stats.startedAt).getTime();
-  const end = new Date(errorScreenshot.takenAt).getTime();
+  const end = new Date(results.stats.endedAt).getTime();
   return { start, end };
 }
 
@@ -55,10 +52,19 @@ const task = {
         for (const attempt of test.attempts) {
           if (attempt.state === 'failed') {
             const { start, end } = getCleanupTimeframe({ attempt, results });
-            controller.removeSnapshotsMadeBetween({
-              start,
-              end,
-            });
+            if (typeof controller.removeDuplicatesInTimeframe === 'function') {
+              // happo-e2e >= 2.4.0
+              controller.removeDuplicatesInTimeframe({
+                start,
+                end,
+              });
+            } else {
+              // happo-e2e < 2.4.0
+              controller.removeSnapshotsMadeBetween({
+                start,
+                end,
+              });
+            }
           }
         }
       }
