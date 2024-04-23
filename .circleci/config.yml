@@ -1,16 +1,14 @@
 version: 2.1
 orbs:
-  node: circleci/node@5.0.2
+  node: circleci/node@5.2.0
   cypress: cypress-io/cypress@2.0.0
 executors:
-  node-16:
+  node:
     docker:
-      - image: 'cypress/base:16.14.2'
+      - image: 'cypress/base:20.12.2'
 jobs:
   build-and-test:
-    executor:
-      name: node/default
-      tag: '16.13.2'
+    executor: node
     steps:
       - checkout
       - node/install-packages:
@@ -24,11 +22,11 @@ workflows:
   cypress:
     jobs:
       - cypress/install:
-          executor: node-16
+          executor: node
           yarn: true
 
       - cypress/run:
-          executor: node-16
+          executor: node
           name: cypress-download-all
           requires:
             - cypress/install
@@ -37,7 +35,7 @@ workflows:
           command-prefix: 'HAPPO_PROJECT=download-all HAPPO_DOWNLOAD_ALL=true yarn happo-e2e -- -- yarn'
 
       - cypress/run:
-          executor: node-16
+          executor: node
           name: cypress-local-snapshots
           requires:
             - cypress/install
@@ -46,7 +44,7 @@ workflows:
           command-prefix: 'CYPRESS_HAPPO_USE_LOCAL_SNAPSHOTS=true HAPPO_PROJECT=local-snapshots yarn happo-e2e -- -- yarn'
 
       - cypress/run:
-          executor: node-16
+          executor: node
           name: cypress-allow-failures
           requires:
             - cypress/install
@@ -55,7 +53,7 @@ workflows:
           command-prefix: 'CYPRESS_INTRODUCE_FAILING_ASSERTION=true HAPPO_PROJECT=allow-failures yarn happo-e2e -- --allow-failures -- yarn'
 
       - cypress/run:
-          executor: node-16
+          executor: node
           name: cypress-parallel
           requires:
             - cypress/install
@@ -69,7 +67,7 @@ workflows:
             - run: 'HAPPO_PROJECT=parallel HAPPO_NONCE=${CIRCLE_WORKFLOW_ID} yarn happo-e2e -- finalize'
 
       - cypress/run:
-          executor: node-16
+          executor: node
           name: cypress-parallel-allow-failures
           requires:
             - cypress/install
