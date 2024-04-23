@@ -21,13 +21,13 @@ function resolveTargetName() {
   return `${Cypress.browser.name}-${viewportWidth}x${viewportHeight}`;
 }
 
-function takeLocalSnapshot({ originalSubject, component, variant, options }) {
+function takeLocalSnapshot({ originalSubject, component, variant, targets, options }) {
   const imageId = `${Math.random()}`.slice(2);
   cy.task('happoRegisterLocalSnapshot', {
     imageId,
     component,
     variant,
-    targets: options.targets,
+    targets,
     target: resolveTargetName(),
   });
   cy.wrap(originalSubject, { log: false }).first().screenshot(imageId, options);
@@ -37,32 +37,38 @@ Cypress.Commands.add(
   'happoScreenshot',
   { prevSubject: true },
   (originalSubject, options = {}) => {
-    const component = options.component || cy.state('runnable').fullTitle();
-    const variant = options.variant || 'default';
+    const {
+      component = cy.state('runnable').fullTitle(),
+      variant = 'default',
+      responsiveInlinedCanvases,
+      includeAllElements,
+      transformDOM,
+      targets,
+      ...otherOptions
+    } = options;
 
     if (config.localSnapshots) {
       return takeLocalSnapshot({
         originalSubject,
         component,
         variant,
-        options,
+        targets,
+        options: otherOptions,
       });
     }
 
     const doc = originalSubject[0].ownerDocument;
 
-    const responsiveInlinedCanvases =
-      typeof options.responsiveInlinedCanvases === 'boolean'
-        ? options.responsiveInlinedCanvases
+    const resInCan =
+      typeof responsiveInlinedCanvases === 'boolean'
+        ? responsiveInlinedCanvases
         : config.responsiveInlinedCanvases;
 
     const domSnapshot = takeDOMSnapshot({
       doc,
-      element: options.includeAllElements
-        ? originalSubject
-        : originalSubject[0],
-      responsiveInlinedCanvases,
-      transformDOM: options.transformDOM,
+      element: includeAllElements ? originalSubject : originalSubject[0],
+      responsiveInlinedCanvases: resInCan,
+      transformDOM: transformDOM,
       handleBase64Image: ({ src, base64Url }) => {
         const rawBase64 = base64Url.replace(/^data:image\/png;base64,/, '');
         const chunks = chunked(rawBase64, config.canvasChunkSize);
@@ -75,18 +81,22 @@ Cypress.Commands.add(
             src,
             isFirst,
             isLast,
-          });
+          }, otherOptions);
         }
       },
     });
 
-    cy.task('happoRegisterSnapshot', {
-      timestamp: Date.now(),
-      component,
-      variant,
-      targets: options.targets,
-      ...domSnapshot,
-    });
+    cy.task(
+      'happoRegisterSnapshot',
+      {
+        timestamp: Date.now(),
+        component,
+        variant,
+        targets,
+        ...domSnapshot,
+      },
+      otherOptions,
+    );
   },
 );
 
@@ -101,10 +111,11 @@ Cypress.Commands.add('happoHideDynamicElements', (options = {}) => {
     defaultSelectors = ['time'],
     selectors = [],
     replace = false,
+    ...otherOptions
   } = options;
   const allMatchers = defaultMatchers.concat(matchers);
   const allSelectors = defaultSelectors.concat(selectors);
-  cy.document().then(doc => {
+  cy.document(otherOptions).then(doc => {
     const elementsToHide = [];
     doc.body.querySelectorAll('*').forEach(e => {
       if (e.firstElementChild) {

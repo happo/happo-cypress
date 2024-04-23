@@ -1,14 +1,17 @@
 describe('The Home Page', () => {
   it('successfully loads', () => {
-    cy.visit('/');
-    cy.wait(100);
-    cy.scrollTo('bottom', { duration: 100 });
-    cy.scrollTo('top');
+    cy.visit('/', { log: false });
+    cy.wait(100, { log: false });
+    cy.scrollTo('bottom', { duration: 100, log: false });
+    cy.scrollTo('top', { log: false });
 
-    cy.happoHideDynamicElements({ selectors: ['.hide-me'] });
+    cy.happoHideDynamicElements({ selectors: ['.hide-me'], log: false });
 
-    cy.get('body').happoScreenshot({ component: 'Full-page' });
-    cy.get('body').happoScreenshot({
+    cy.get('body', { log: false }).happoScreenshot({
+      component: 'Full-page',
+      log: false,
+    });
+    cy.get('body', { log: false }).happoScreenshot({
       component: 'Full-page',
       variant: 'replaced-card',
       transformDOM: {
@@ -19,8 +22,9 @@ describe('The Home Page', () => {
           return div;
         },
       },
+      log: false,
     });
-    cy.get('body').happoScreenshot({
+    cy.get('body', { log: false }).happoScreenshot({
       component: 'Full-page',
       variant: 'replaced-images',
       transformDOM: {
@@ -31,72 +35,94 @@ describe('The Home Page', () => {
           return div;
         },
       },
+      log: false,
     });
-    cy.get('.card').happoScreenshot({ component: 'Card' });
-    cy.get('.card,.button').happoScreenshot({
+    cy.get('.card', { log: false }).happoScreenshot({
+      component: 'Card',
+      log: false,
+    });
+    cy.get('.card,.button', { log: false }).happoScreenshot({
       includeAllElements: true,
       component: 'Card + Button',
+      log: false,
     });
 
-    cy.happoHideDynamicElements({ selectors: ['.hide-me'] });
-    cy.get('.dynamic-text').happoScreenshot({
+    cy.happoHideDynamicElements({ selectors: ['.hide-me'], log: false });
+    cy.get('.dynamic-text', { log: false }).happoScreenshot({
       component: 'Dynamic text',
+      log: false,
     });
 
-    cy.happoHideDynamicElements({ replace: true });
-    cy.get('.dynamic-text').happoScreenshot({
+    cy.happoHideDynamicElements({ replace: true, log: false });
+    cy.get('.dynamic-text', { log: false }).happoScreenshot({
       component: 'Dynamic text',
       variant: 'replaced',
+      log: false,
     });
 
-    cy.get('.scrollcontainer')
-      .scrollTo('center')
-      .happoScreenshot({ component: 'Scrollcontainer', variant: 'center' });
+    cy.get('.scrollcontainer', { log: false })
+      .scrollTo('center', { log: false })
+      .happoScreenshot({
+        component: 'Scrollcontainer',
+        variant: 'center',
+        log: false,
+      });
 
-    cy.visit('/');
-    cy.happoHideDynamicElements({ replace: true, selectors: ['.hide-me'] });
-    cy.wait(100);
-    cy.get('.button').happoScreenshot({
+    cy.visit('/', { log: false });
+    cy.happoHideDynamicElements({
+      replace: true,
+      selectors: ['.hide-me'],
+      log: false,
+    });
+    cy.wait(100, { log: false });
+    cy.get('.button', { log: false }).happoScreenshot({
       component: 'Button',
       variant: 'default',
       targets: [
         'chromeSmall',
         { name: 'firefoxSmall', browser: 'firefox', viewport: '400x800' },
       ],
+      log: false,
     });
-    cy.get('.card').happoScreenshot({
+    cy.get('.card', { log: false }).happoScreenshot({
       component: 'Card',
       variant: 'firefox-only',
       targets: [
         { name: 'firefoxSmall', browser: 'firefox', viewport: '400x800' },
       ],
+      log: false,
     });
 
-    cy.get('.images').happoScreenshot({
+    cy.get('.images', { log: false }).happoScreenshot({
       component: 'Images',
       variant: 'multiple',
+      log: false,
     });
 
-    cy.get('.button').happoScreenshot();
-    cy.get('.button').happoScreenshot();
-    cy.get('.button').happoScreenshot();
+    cy.get('.button', { log: false }).happoScreenshot({ log: false });
+    cy.get('.button', { log: false }).happoScreenshot({ log: false });
+    cy.get('.button', { log: false }).happoScreenshot();
 
-    cy.get('[data-test="untainted-canvas"]').happoScreenshot({
+    cy.get('[data-test="untainted-canvas"]', { log: false }).happoScreenshot({
       component: 'Canvas',
       variant: 'untainted',
+      log: false,
     });
-    cy.get('.responsive-canvas-wrapper').happoScreenshot({
+    cy.get('.responsive-canvas-wrapper', { log: false }).happoScreenshot({
       component: 'Canvas',
       variant: 'wrapped, responsive',
       responsiveInlinedCanvases: true,
+      log: false,
     });
-    cy.get('[data-test="tainted-canvas"]').happoScreenshot({
+    cy.get('[data-test="tainted-canvas"]', { log: false }).happoScreenshot({
       component: 'Canvas',
       variant: 'tainted',
+      log: false,
     });
-    cy.get('[data-test="empty-canvas"]').happoScreenshot({
+    cy.get('[data-test="empty-canvas"]', { log: false }).happoScreenshot({
       component: 'Canvas',
       variant: 'empty',
+      log: false,
     });
   });
 });
