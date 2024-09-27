@@ -50,7 +50,8 @@ workflows:
             - cypress/install
           yarn: true
           start: yarn dev
-          command-prefix: 'CYPRESS_INTRODUCE_FAILING_ASSERTION=true HAPPO_PROJECT=allow-failures yarn happo-e2e -- --allow-failures -- yarn'
+          command-prefix: |
+            flip_exit_code() { ( "$@" ) && exit 1 || exit 0; }; CYPRESS_INTRODUCE_FAILING_ASSERTION=true HAPPO_PROJECT=allow-failures flip_exit_code yarn happo-e2e -- --allow-failures -- yarn
 
       - cypress/run:
           executor: node
@@ -77,6 +78,7 @@ workflows:
           parallelism: 2
           record: true
           ci-build-id: 'parallel-allow-failures-${CIRCLE_SHA1}'
-          command-prefix: 'CYPRESS_INTRODUCE_FAILING_ASSERTION=true HAPPO_PROJECT=parallel-allow-failures HAPPO_NONCE=B_${CIRCLE_WORKFLOW_ID} yarn happo-e2e -- --allow-failures -- yarn'
+          command-prefix: |
+            flip_exit_code() { ( "$@" ) && exit 1 || exit 0; }; CYPRESS_INTRODUCE_FAILING_ASSERTION=true HAPPO_PROJECT=parallel-allow-failures HAPPO_NONCE=B_${CIRCLE_WORKFLOW_ID} flip_exit_code yarn happo-e2e -- --allow-failures -- yarn
           post-steps:
             - run: 'HAPPO_PROJECT=parallel-allow-failures HAPPO_NONCE=B_${CIRCLE_WORKFLOW_ID} yarn happo-e2e -- finalize'
