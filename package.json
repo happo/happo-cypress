@@ -16,6 +16,12 @@
     "start": "next start",
     "happo-e2e": "export $(grep -v '^#' .env | xargs) && happo-e2e"
   },
+  "prettier": {
+    "printWidth": 85,
+    "singleQuote": true,
+    "trailingComma": "all",
+    "arrowParens": "always"
+  },
   "devDependencies": {
     "cypress": "^13.6.0",
     "eslint": "^6.8.0",

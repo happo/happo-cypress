@@ -99,16 +99,14 @@ export default function IndexPage() {
           <i>13 minutes ago</i>.
         </p>
         <p>
-          The time is now <span>2:54pm</span>. One minute ago was <i>2:53 PM</i>
-          .
+          The time is now <span>2:54pm</span>. One minute ago was <i>2:53 PM</i>.
         </p>
         <p>
           In Sweden however, it's <time>54 minutes past 14</time>.
         </p>
 
         <p>
-          Here's some content that you can{' '}
-          <b className="hide-me">manually hide</b>.
+          Here's some content that you can <b className="hide-me">manually hide</b>.
         </p>
       </div>
       <div className="card">
@@ -168,10 +166,7 @@ export default function IndexPage() {
           }}
         />
         <picture>
-          <source
-            srcSet="/storyhotel-breakfast.jpg"
-            media="(max-width: 1800px)"
-          />
+          <source srcSet="/storyhotel-breakfast.jpg" media="(max-width: 1800px)" />
           <img className="image" src="/broken-image.jpg" />
         </picture>
         <img

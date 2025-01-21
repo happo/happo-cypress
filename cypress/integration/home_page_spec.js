@@ -87,9 +87,7 @@ describe('The Home Page', () => {
     cy.get('.card', { log: false }).happoScreenshot({
       component: 'Card',
       variant: 'firefox-only',
-      targets: [
-        { name: 'firefoxSmall', browser: 'firefox', viewport: '400x800' },
-      ],
+      targets: [{ name: 'firefoxSmall', browser: 'firefox', viewport: '400x800' }],
       log: false,
     });
 

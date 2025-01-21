@@ -5,7 +5,7 @@ module.exports = {
     Router: 'next/router',
   },
   namedExports: {
-    'react': ['useEffect', 'useState', 'useRef'],
+    react: ['useEffect', 'useState', 'useRef'],
   },
   excludes: ['./next/**'],
   importDevDependencies: true,

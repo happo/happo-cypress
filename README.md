@@ -8,5 +8,5 @@ Check out the
 for a demo of how this module is used.
 
 Documentation for this module has moved to the official happo.io docs:
-## https://docs.happo.io/docs/cypress
 
+## https://docs.happo.io/docs/cypress

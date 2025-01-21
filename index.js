@@ -11,7 +11,7 @@ let config = {
 };
 
 module.exports = {
-  configure: userConfig => {
+  configure: (userConfig) => {
     config = { ...config, ...(userConfig || {}) };
   },
 };
@@ -21,7 +21,13 @@ function resolveTargetName() {
   return `${Cypress.browser.name}-${viewportWidth}x${viewportHeight}`;
 }
 
-function takeLocalSnapshot({ originalSubject, component, variant, targets, options }) {
+function takeLocalSnapshot({
+  originalSubject,
+  component,
+  variant,
+  targets,
+  options,
+}) {
   const imageId = `${Math.random()}`.slice(2);
   cy.task('happoRegisterLocalSnapshot', {
     imageId,
@@ -76,12 +82,16 @@ Cypress.Commands.add(
           const base64Chunk = chunks[i];
           const isFirst = i === 0;
           const isLast = i === chunks.length - 1;
-          cy.task('happoRegisterBase64Image', {
-            base64Chunk,
-            src,
-            isFirst,
-            isLast,
-          }, otherOptions);
+          cy.task(
+            'happoRegisterBase64Image',
+            {
+              base64Chunk,
+              src,
+              isFirst,
+              isLast,
+            },
+            otherOptions,
+          );
         }
       },
     });
@@ -115,20 +125,20 @@ Cypress.Commands.add('happoHideDynamicElements', (options = {}) => {
   } = options;
   const allMatchers = defaultMatchers.concat(matchers);
   const allSelectors = defaultSelectors.concat(selectors);
-  cy.document(otherOptions).then(doc => {
+  cy.document(otherOptions).then((doc) => {
     const elementsToHide = [];
-    doc.body.querySelectorAll('*').forEach(e => {
+    doc.body.querySelectorAll('*').forEach((e) => {
       if (e.firstElementChild) {
         return; // this is not a leaf element
       }
       const text = e.textContent;
-      if (allMatchers.some(regex => regex.test(text))) {
+      if (allMatchers.some((regex) => regex.test(text))) {
         elementsToHide.push(e);
       }
     });
 
     for (const selector of allSelectors) {
-      doc.body.querySelectorAll(selector).forEach(e => {
+      doc.body.querySelectorAll(selector).forEach((e) => {
         elementsToHide.push(e);
       });
     }

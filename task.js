@@ -44,7 +44,7 @@ const task = {
     if (results) {
       for (const test of results.tests) {
         const wasRetried =
-          test.attempts.some(t => t.state === 'failed') &&
+          test.attempts.some((t) => t.state === 'failed') &&
           test.attempts[test.attempts.length - 1].state === 'passed';
         if (!wasRetried) {
           continue;

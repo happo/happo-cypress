@@ -3,6 +3,7 @@
   src: url('../Lato-Bold.woff2') format('woff2');
 }
 
-body, button {
+body,
+button {
   font-family: 'CustomFont';
 }
