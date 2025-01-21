@@ -41,11 +41,19 @@ function extractHappoScreenshots(filePath) {
       const firstArgument = node.arguments[0];
 
       if (firstArgument && firstArgument.type === 'ObjectExpression') {
-        const componentProperty = firstArgument.properties.find(prop => prop.key.name === 'component');
-        const variantProperty = firstArgument.properties.find(prop => prop.key.name === 'variant');
-        const targetsProperty = firstArgument.properties.find(prop => prop.key.name === 'targets');
+        const componentProperty = firstArgument.properties.find(
+          (prop) => prop.key.name === 'component',
+        );
+        const variantProperty = firstArgument.properties.find(
+          (prop) => prop.key.name === 'variant',
+        );
+        const targetsProperty = firstArgument.properties.find(
+          (prop) => prop.key.name === 'targets',
+        );
 
-        const component = componentProperty ? componentProperty.value.value : undefined;
+        const component = componentProperty
+          ? componentProperty.value.value
+          : undefined;
         const variant = variantProperty ? variantProperty.value.value : undefined;
 
         let targets;
@@ -55,7 +63,9 @@ function extractHappoScreenshots(filePath) {
               if (element.type === 'Literal') {
                 return element.value;
               } else if (element.type === 'ObjectExpression') {
-                const nameProperty = element.properties.find(prop => prop.key.name === 'name');
+                const nameProperty = element.properties.find(
+                  (prop) => prop.key.name === 'name',
+                );
                 return nameProperty ? nameProperty.value.value : undefined;
               }
             });
@@ -90,11 +100,13 @@ jsFiles.forEach((file) => {
 // Output the results
 allScreenshots.forEach((screenshot) => {
   console.log(`File: ${screenshot.filePath}`);
-  console.log(`Location: Line ${screenshot.loc.start.line}:${screenshot.loc.start.column}`);
+  console.log(
+    `Location: Line ${screenshot.loc.start.line}:${screenshot.loc.start.column}`,
+  );
   console.log(`Component: ${screenshot.component}`);
   console.log(`Variant: ${screenshot.variant}`);
-  console.log(`Targets: ${screenshot.targets ? JSON.stringify(screenshot.targets) : 'undefined'}`);
+  console.log(
+    `Targets: ${screenshot.targets ? JSON.stringify(screenshot.targets) : 'undefined'}`,
+  );
   console.log('\n');
 });
-
-
