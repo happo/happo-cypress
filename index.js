@@ -50,6 +50,7 @@ Cypress.Commands.add(
       includeAllElements,
       transformDOM,
       targets,
+      snapshotStrategy = 'hoist',
       ...otherOptions
     } = options;
 
@@ -75,6 +76,7 @@ Cypress.Commands.add(
       element: includeAllElements ? originalSubject : originalSubject[0],
       responsiveInlinedCanvases: resInCan,
       transformDOM: transformDOM,
+      strategy: snapshotStrategy,
       handleBase64Image: ({ src, base64Url }) => {
         const rawBase64 = base64Url.replace(/^data:image\/png;base64,/, '');
         const chunks = chunked(rawBase64, config.canvasChunkSize);
