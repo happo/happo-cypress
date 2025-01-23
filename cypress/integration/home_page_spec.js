@@ -122,5 +122,18 @@ describe('The Home Page', () => {
       variant: 'empty',
       log: false,
     });
+
+    cy.get('#stretch-to-parent', { log: false }).happoScreenshot({
+      component: 'Stretch to parent',
+      variant: 'snapshotStrategy hoist',
+      log: false,
+      snapshotStrategy: 'hoist',
+    });
+    cy.get('#stretch-to-parent', { log: false }).happoScreenshot({
+      component: 'Stretch to parent',
+      variant: 'snapshotStrategy clip',
+      log: false,
+      snapshotStrategy: 'clip',
+    });
   });
 });

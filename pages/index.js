@@ -174,6 +174,14 @@ export default function IndexPage() {
           src="https://q-xx.bstatic.com/xdata/images/hotel/max1000/133065887.jpg?k=4d2f546ba33c456afeceed92d808a48de95f92c65a235c9cf399a6e2f6c67c34&o="
         />
       </div>
+
+      <div style={{ width: 200 }}>
+        I am 200px wide.
+        <div style={{ width: '100%' }} id="stretch-to-parent">
+          I stretch to 100% width of my parent, which is 200px wide.
+        </div>
+      </div>
+
       <style jsx>{`
         .card {
           max-width: 400px;
