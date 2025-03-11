@@ -1,6 +1,13 @@
 const chunked = require('./src/chunked');
 const takeDOMSnapshot = require('happo-e2e/takeDOMSnapshot');
 
+Cypress.on('window:before:load', (win) => {
+  if (takeDOMSnapshot.applyConstructedStylesPatch) {
+    console.log('[Happo] Applying constructed styles patch');
+    takeDOMSnapshot.applyConstructedStylesPatch(win);
+  }
+});
+
 before(() => {
   cy.on('window:load', takeDOMSnapshot.init);
 });
