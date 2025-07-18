@@ -7,7 +7,7 @@ on:
 jobs:
   automerge:
     if: github.actor == 'dependabot[bot]'
-    uses: happo/happo-view/.github/workflows/automerge.yml@main
+    uses: happo/happo.io/.github/workflows/automerge.yml@main
     permissions:
       pull-requests: write
       contents: write
