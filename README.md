@@ -1,5 +1,17 @@
 # Cypress integration for Happo
 
+> **⚠️ Notice:** This package has been merged into the
+> [`happo`](https://github.com/happo/happo) package. Please install `happo`
+> instead:
+>
+> ```bash
+> npm install --save-dev happo
+> ```
+>
+> [Migration guide](https://docs.happo.io/docs/migrating-from-legacy-packages)
+
+---
+
 The `happo-cypress` module adds [Happo.io](https://happo.io) cross-browser
 screenshots to your [Cypress.io](https://cypress.io) test suite.
 
